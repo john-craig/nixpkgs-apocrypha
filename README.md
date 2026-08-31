@@ -23,6 +23,13 @@ namespaces are assembled in [`default.nix`](./default.nix).
 
 ## Home Manager modules
 
+Remaining shell user configuration is provided by the standalone capability
+modules documented in [`docs/shell-user-configuration.md`](./docs/shell-user-configuration.md).
+They cover CLI tools, development tooling, explicit SSH topology, and lshell.
+Missing pinned packages can be supplied through typed package override options.
+Secrets remain external, and these modules do not add aliases or ambient
+session variables.
+
 The `homeModules.tmux` module provides evak's tmux workflow. Import it into a
 Home Manager configuration and enable the standard Home Manager option:
 
