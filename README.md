@@ -43,6 +43,41 @@ The module is an extraction of
 `modules/userModules/shellModules/tmux/default.nix` from the Panoply
 repository.
 
+The `homeModules.zsh` module provides the core evak zsh setup:
+
+```nix
+{
+  imports = [ inputs.nixpkgs-apocrypha.homeModules.zsh ];
+  programs.zsh.enable = true;
+}
+```
+
+It enables completion, autosuggestions, syntax highlighting, history substring
+search, the pinned Alpine keybindings plugin, and the managed `.zprofile`.
+Extended history metadata is enabled with `evak.zsh.historyMetadata = true;`.
+The module deliberately does not install shell aliases or set environment
+variables.
+
+Long-running command notifications are opt-in and configurable:
+
+```nix
+{
+  evak.zsh.notifications = {
+    enable = true;
+    thresholdSeconds = 5;
+    gotifyUrl = "https://gotify.example/message";
+    tokenPath = "/run/user/1000/secrets/gotify/api_token";
+    fallbackCommand = "hyprctl notify 1 5000 0";
+  };
+}
+```
+
+Notification failures are non-fatal. The Gotify token remains an external file,
+and the fallback assumes the configured desktop command is available.
+
+The module is an extraction of
+`modules/userModules/shellModules/zsh/default.nix` from the Panoply repository.
+
 ## Publishing
 
 This repository follows the [NUR repository documentation](https://nur.nix-community.org/documentation/).

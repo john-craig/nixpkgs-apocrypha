@@ -1,3 +1,4 @@
 {
   tmux = ./tmux;
+  zsh = ./zsh;
 }
