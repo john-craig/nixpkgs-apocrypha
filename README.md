@@ -95,6 +95,25 @@ profile; `mutableExtensionsDir` is intentionally not enabled because it is
 incompatible with Home Manager profiles. The tmux and zsh modules are separate
 and must be enabled independently when needed.
 
+The `homeModules.opencode` module provides the documented OpenCode TUI
+customizations independently of the primary-agent launcher:
+
+```nix
+{
+  imports = [ inputs.nixpkgs-apocrypha.homeModules.opencode ];
+  evak.opencode.enable = true;
+}
+```
+
+It generates `~/.config/opencode/tui.json`, the SynthWave theme,
+`opencode-notifier.json`, the managed `ding.mp3`, and `opencode.json` with the
+notifier, Codex quota, and quotes plugins. Completion feedback is limited to
+turns longer than 10 seconds and allows notifications while focused. Gotify is
+attempted first using `evak.opencode.notifications.gotifyUrl`, `tokenPath`,
+and `gotifyPriority`; failed delivery falls back to `hyprctl` without affecting
+OpenCode. The module assumes OpenCode, tmux, zsh, Hyprland, and a compatible
+Linux audio utility are provided separately.
+
 ## Publishing
 
 This repository follows the [NUR repository documentation](https://nur.nix-community.org/documentation/).
