@@ -78,6 +78,23 @@ and the fallback assumes the configured desktop command is available.
 The module is an extraction of
 `modules/userModules/shellModules/zsh/default.nix` from the Panoply repository.
 
+The `homeModules.vscodium` module provides the VSCodium editor configuration:
+
+```nix
+{
+  imports = [ inputs.nixpkgs-apocrypha.homeModules.vscodium ];
+  programs.vscode.enable = true;
+}
+```
+
+It selects VSCodium with the SynthWave '84 neon CSS patch, installs the
+declarative default profile and its Jinja, Python, GitHub Copilot, Nix IDE, and
+SynthWave '84 extensions, and configures the editor settings, keybindings, and
+tmux terminal profile. Extensions are managed declaratively through the
+profile; `mutableExtensionsDir` is intentionally not enabled because it is
+incompatible with Home Manager profiles. The tmux and zsh modules are separate
+and must be enabled independently when needed.
+
 ## Publishing
 
 This repository follows the [NUR repository documentation](https://nur.nix-community.org/documentation/).
