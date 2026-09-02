@@ -148,6 +148,11 @@ and `gotifyPriority`; failed delivery falls back to `hyprctl` without affecting
 OpenCode. The module assumes OpenCode, tmux, zsh, Hyprland, and a compatible
 Linux audio utility are provided separately.
 
+Declarative Panoply-derived OpenCode roles are provided by
+[`homeModules.opencode-agents`](./docs/opencode-agents.md). It is independent
+of the TUI customization module and requires the exported `opencode-nix`
+overlay.
+
 ## Publishing
 
 This repository follows the [NUR repository documentation](https://nur.nix-community.org/documentation/).

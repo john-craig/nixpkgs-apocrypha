@@ -7,7 +7,7 @@ Provides a reusable Home Manager module for evak's documented OpenCode TUI theme
 
 ### Requirement: Public and explicit module
 
-The repository SHALL expose a Home Manager module at `homeModules.opencode`, and the module SHALL apply its configuration only when `evak.opencode.enable` is enabled.
+The repository SHALL expose a Home Manager module at `homeModules.opencode`, and the module SHALL apply its configuration only when `evak.opencode.enable` is enabled. The module SHALL provide the existing global OpenCode customizations independently of the dedicated `homeModules.opencode-agents` module and without requiring Panoply modules.
 
 #### Scenario: Module is imported but disabled
 
@@ -72,7 +72,7 @@ When enabled, the module SHALL configure `opencode-codex-quota@1.0.1` and `openc
 
 ### Requirement: Documentation and verification
 
-The repository SHALL document module import, enablement, generated paths, plugin behavior, notification configuration, audio/runtime assumptions, and troubleshooting commands, and SHALL provide focused generated-configuration evaluation coverage.
+The repository SHALL document module import, enablement, generated paths, plugin behavior, notification configuration, audio/runtime assumptions, and troubleshooting commands, and SHALL provide focused generated-configuration evaluation coverage for this module.
 
 #### Scenario: Configuration contract is tested
 

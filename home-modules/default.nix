@@ -3,6 +3,7 @@
   zsh = ./zsh;
   vscodium = ./vscodium;
   opencode = ./opencode;
+  opencode-agents = ./opencode-agents;
   shellCliTools = ./shell-cli-tools;
   shellDevelopmentTools = ./shell-development-tools;
   shellSsh = ./shell-ssh;

@@ -1,0 +1,77 @@
+## Purpose
+
+Provides reproducible, named OpenCode agent environments that preserve Panoply's role-specific behavior while making prompts, tools, policies, and model settings independently configurable through Home Manager.
+
+## ADDED Requirements
+
+### Requirement: Dedicated public Home Manager module
+
+The repository SHALL provide a Home Manager module at `homeModules.opencode-agents`, implemented under `home-modules/opencode-agents`, and SHALL apply its configuration only when its own enable option is enabled.
+
+#### Scenario: Agent module is imported but disabled
+- **WHEN** a Home Manager configuration imports `homeModules.opencode-agents` with agent configuration disabled
+- **THEN** it SHALL not materialize agent files or alter the existing global OpenCode customization files
+
+#### Scenario: Agent module is composed with customization module
+- **WHEN** a Home Manager configuration imports both `homeModules.opencode-agents` and `homeModules.opencode`
+- **THEN** both modules SHALL generate their respective files without requiring Panoply or overwriting each other's configuration responsibilities
+
+### Requirement: Named environment configuration
+
+The system SHALL expose named OpenCode environments with stable names and descriptions, and SHALL support selecting one environment as the default.
+
+#### Scenario: Environment is selected
+- **WHEN** a configured user selects a named environment
+- **THEN** OpenCode SHALL load that environment's prompt, model settings, skills, rules, subagents, MCP servers, and applicable policy metadata
+
+#### Scenario: Unknown environment is selected
+- **WHEN** a user selects a name that is not configured
+- **THEN** configuration evaluation or environment resolution SHALL fail clearly rather than silently falling back to another role
+
+### Requirement: Role content is materialized
+
+Each configured environment SHALL materialize its instructions, skills, rules, and subagent profiles in OpenCode-compatible locations or configuration fields, preserving their names and instruction text.
+
+#### Scenario: Role content is generated
+- **WHEN** Home Manager evaluates an enabled environment
+- **THEN** generated configuration SHALL contain the environment instructions and all selected named skills, rules, and subagents without requiring Panoply at runtime
+
+### Requirement: MCP capabilities are explicit
+
+An environment SHALL expose only its declared MCP servers, including their transport, command or URL, arguments, and authentication reference when configured. MCP credentials SHALL NOT be embedded in generated files.
+
+#### Scenario: Environment has MCP servers
+- **WHEN** an environment declares MCP servers
+- **THEN** OpenCode configuration SHALL include those server definitions and SHALL preserve disabled or unavailable integrations as non-operational configuration rather than claiming they are available
+
+#### Scenario: Environment has no MCP servers
+- **WHEN** an environment declares no MCP servers
+- **THEN** its generated configuration SHALL not inherit unrelated MCP servers from another environment
+
+### Requirement: Authorization and isolation boundaries are preserved
+
+The migrated environments SHALL preserve each source environment's authentication mode and project-discovery intent, and SHALL fail closed when a required credential reference is missing.
+
+#### Scenario: Shared authentication is configured
+- **WHEN** an environment uses shared authentication
+- **THEN** generated configuration SHALL reference the shared authentication mechanism without copying secret contents
+
+#### Scenario: Required authentication reference is missing
+- **WHEN** an environment requires a file or API-key reference and none is supplied
+- **THEN** evaluation SHALL fail with an environment-specific error
+
+### Requirement: Environment content is isolated
+
+The system SHALL prevent one named environment's instructions, tools, or role profiles from being implicitly merged into another environment, except for explicitly declared shared definitions.
+
+#### Scenario: Two environments are configured
+- **WHEN** two environments declare different MCP servers or role content
+- **THEN** each generated environment SHALL contain only its own declarations and explicitly shared content
+
+### Requirement: Migration coverage is auditable
+
+The repository SHALL document the mapping of all 15 source environments and identify any Codex behavior that has no direct OpenCode equivalent.
+
+#### Scenario: Migration coverage is reviewed
+- **WHEN** the documented migration inventory is compared with the Panoply source
+- **THEN** every source environment SHALL be accounted for as migrated, intentionally omitted with a reason, or blocked by an explicit unresolved incompatibility
