@@ -1,4 +1,4 @@
-{ lib, fetchFromGitHub, rustPlatform }:
+{ lib, fetchFromGitHub, git, rustPlatform }:
 
 rustPlatform.buildRustPackage rec {
   pname = "sceptre";
@@ -11,7 +11,18 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-5n0DhQxfMilPdJPuQEoecQ/912rQM37+WgRMs54MaZM=";
   };
 
-  cargoLock.lockFile = "${src}/Cargo.lock";
+  nativeBuildInputs = [ git ];
+
+  cargoLock = {
+    lockFile = "${src}/Cargo.lock";
+    extraRegistries = {
+      "https://github.com/rust-lang/crates.io-index" = "https://static.crates.io/crates";
+    };
+  };
+
+  preBuild = ''
+    sed -i '/\[source."https:\/\/github.com\/rust-lang\/crates.io-index"\]/,/^$/d' "$NIX_BUILD_TOP/.cargo/config.toml"
+  '';
 
   postInstall = ''
     mv "$out/bin/rust-template" "$out/bin/sceptre"
