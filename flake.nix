@@ -18,6 +18,16 @@
       homeModules = import ./home-modules;
       overlays.opencode-nix = opencode-nix.overlays.default;
       checks = forAllSystems (system: let pkgs = import nixpkgs { inherit system; }; in {
+        sceptre = pkgs.runCommand "sceptre-check" {
+          nativeBuildInputs = [ self.legacyPackages.${system}.sceptre ];
+        } ''
+          test -x "${self.legacyPackages.${system}.sceptre}/bin/sceptre"
+          sceptre --help >/dev/null
+          sceptre repository --help | grep -q "Usage: sceptre repository"
+          test ! -e "${self.legacyPackages.${system}.sceptre}/credentials"
+          test ! -e "${self.legacyPackages.${system}.sceptre}/secrets"
+          touch "$out"
+        '';
         remaining-shell-user-configuration = import ./tests/remaining-shell-user-configuration.nix { inherit pkgs; };
         traefik-modules = import ./tests/traefik-modules.nix { inherit pkgs; };
         opencode-agents = import ./tests/opencode-agents.nix {

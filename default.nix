@@ -20,4 +20,5 @@
   overlays = import ./overlays; # nixpkgs overlays
 
   lshell = pkgs.callPackage ./pkgs/lshell { };
+  sceptre = pkgs.callPackage ./pkgs/sceptre { };
 }

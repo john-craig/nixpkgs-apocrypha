@@ -7,6 +7,7 @@ repository for Nix packages, modules, overlays, and configuration helpers.
 
 - [`lshell`](./pkgs/lshell) — a limited shell with fine-grained command
   allow-listing.
+- [`sceptre`](./pkgs/sceptre) — a Rust CLI for Grimoire development workflows.
 
 ## NixOS modules
 
@@ -42,6 +43,8 @@ Evaluate the repository’s package set with:
 ```console
 nix flake check
 nix build .#lshell
+nix build .#sceptre
+nix run .#sceptre -- repository --help
 ```
 
 Package definitions live under [`pkgs/`](./pkgs), and each package may include
