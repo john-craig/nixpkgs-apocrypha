@@ -1,5 +1,5 @@
 {
-  # Add your NixOS modules here
-  #
-  # my-module = ./my-module;
+  traefik = ./traefik.nix;
+  reverseProxy = ./reverse-proxy.nix;
+  traefikJitAccess = ./traefik-jit-access.nix;
 }

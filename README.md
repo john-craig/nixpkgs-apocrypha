@@ -8,6 +8,33 @@ repository for Nix packages, modules, overlays, and configuration helpers.
 - [`lshell`](./pkgs/lshell) — a limited shell with fine-grained command
   allow-listing.
 
+## NixOS modules
+
+The repository exports `nixosModules.traefik`, `nixosModules.reverseProxy`,
+and `nixosModules.traefikJitAccess`. They use explicit options under
+`services.apocrypha` and do not depend on Panoply or a secret manager.
+
+The Traefik module accepts `dnsCredentialsFile` as an external environment-file
+path, and optional container integration is enabled with
+`services.apocrypha.traefik.containers`. Routes are configured with structured
+`services.apocrypha.reverseProxy.routes` entries. JIT access installs the
+`traefik-jit-access` command with `grant`, `revoke`, `list`, and `prune`
+operations; generated state is kept under restrictive permissions.
+
+Panoply migration mapping:
+
+| Panoply option | New option |
+| --- | --- |
+| `hostServices.serviceProxies.enable` | `services.apocrypha.traefik.enable` and `services.apocrypha.reverseProxy.enable` |
+| `hostServices.serviceProxies.resolverName` | `services.apocrypha.traefik.resolverName` |
+| `hostServices.serviceProxies.internalRules` | `services.apocrypha.reverseProxy.internalRule` |
+| `hostServices.serviceProxies.containers.networkName` | `services.apocrypha.traefik.containers.networkName` |
+| `hostServices.networkServices.traefikJitAccess.*` | `services.apocrypha.traefikJitAccess.*` |
+| `config.sops.secrets."traefik/traefik/cloudflare_dns_token".path` | `services.apocrypha.traefik.dnsCredentialsFile` |
+
+Secret values, private addresses, and host-specific routes remain consumer
+configuration and are not embedded in these reusable modules.
+
 ## Local development
 
 Evaluate the repository’s package set with:

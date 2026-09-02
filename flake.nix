@@ -14,6 +14,7 @@
       homeModules = import ./home-modules;
       checks = forAllSystems (system: let pkgs = import nixpkgs { inherit system; }; in {
         remaining-shell-user-configuration = import ./tests/remaining-shell-user-configuration.nix { inherit pkgs; };
+        traefik-modules = import ./tests/traefik-modules.nix { inherit pkgs; };
       });
       # darwinModules = import ./darwin-modules;
       # flakeModules = import ./flake-modules;
