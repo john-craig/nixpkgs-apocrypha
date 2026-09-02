@@ -1,5 +1,4 @@
-{ lib, ... }:
-let
+{lib, ...}: let
   prompt = name: boundary: ''
     You are ${name}, a repository-configured OpenCode specialist.
 
@@ -20,7 +19,7 @@ let
       "no-secrets"
       "isolation"
     ];
-    permission = {
+    permission = lib.mkDefault {
       "*" = "ask";
       read = "allow";
       list = "allow";
@@ -80,8 +79,7 @@ let
     bounded-output = "Limit inspection and command output, cite evidence locations, report confidence and missing evidence, and redact sensitive content.";
     isolation = "Use only this environment's declared tools and role content; configuration alone does not prove an MCP integration is available.";
   };
-in
-{
+in {
   config.evak.opencode-agents = {
     defaultAgent = lib.mkDefault "orchestrator";
     inherit skills rules;
@@ -153,7 +151,25 @@ in
           prompt "Developer" "Implement approved tasks in a supplied repository, preserve unrelated dirty work, and run focused tests."
         )
         // {
-          subagents = [ "testing" ];
+          permission = lib.mkDefault {"*" = "allow";};
+          subagents = ["testing"];
+        };
+      software-architect =
+        role "Designs implementation-ready specifications without applying them." "openai/gpt-5.6-sol" (
+          prompt "Software Architect" "Inspect the supplied project and produce precise requirements, scenarios, design decisions, assumptions, and an implementation handoff. Do not implement, commit, deploy, or mutate external systems."
+        )
+        // {
+          permission = {
+            "*" = "deny";
+            edit = "deny";
+            bash = "deny";
+            task = "deny";
+            read = "allow";
+            list = "allow";
+            glob = "allow";
+            grep = "allow";
+            webfetch = "allow";
+          };
         };
       orchestrator =
         (role "Coordinates bounded specialist work." "openai/gpt-5.6-sol" (
@@ -167,7 +183,7 @@ in
             headers.Authorization = "Bearer {env:REMCODEX_MCP_API_TOKEN}";
           };
           mcp.seshat = {
-            command = [ "seshat-mcp-launcher" ];
+            command = ["seshat-mcp-launcher"];
           };
           subagents = [
             "requirements"
@@ -220,17 +236,17 @@ in
           ];
           authentication.mode = "none";
           mcp.jellyfin = {
-            command = [ "jellyfin-mcp" ];
+            command = ["jellyfin-mcp"];
             enabled = true;
             environment.JELLYFIN_API_KEY = "{env:JELLYFIN_API_KEY}";
           };
           mcp.lidarr = {
-            command = [ "lidarr-mcp" ];
+            command = ["lidarr-mcp"];
             enabled = true;
             environment.LIDARR_API_KEY = "{env:LIDARR_API_KEY}";
           };
           mcp.digarr = {
-            command = [ "digarr-mcp" ];
+            command = ["digarr-mcp"];
             enabled = true;
           };
         };
@@ -244,10 +260,10 @@ in
             "read-only"
           ];
           mcp.rhizomatic_server = {
-            command = [ "rhizomatic-mcp-launcher" ];
+            command = ["rhizomatic-mcp-launcher"];
           };
           mcp.vikunja = {
-            command = [ "vikunja-mcp-launcher" ];
+            command = ["vikunja-mcp-launcher"];
           };
         };
       market-researcher =
@@ -281,7 +297,7 @@ in
         ))
         // {
           mcp.rhizomatic_server = {
-            command = [ "rhizomatic-mcp-launcher" ];
+            command = ["rhizomatic-mcp-launcher"];
           };
         };
       project-manager =
@@ -290,10 +306,10 @@ in
         ))
         // {
           mcp.vikunja = {
-            command = [ "vikunja-mcp-launcher" ];
+            command = ["vikunja-mcp-launcher"];
           };
           mcp.rhizomatic_server = {
-            command = [ "rhizomatic-mcp-launcher" ];
+            command = ["rhizomatic-mcp-launcher"];
           };
         };
       remote-systems-diagnostics-assistant =
@@ -383,9 +399,9 @@ in
           prompt "Voice Assistant" "Forward voice transcriptions verbatim to Orchestrator, confirming sensitive targets and never independently interpreting or executing."
         ))
         // {
-          skills = [ "voice-forwarding" ];
+          skills = ["voice-forwarding"];
           mcp.orchestrator = {
-            command = [ "orchestrator-mcp-launcher" ];
+            command = ["orchestrator-mcp-launcher"];
           };
         };
     };
