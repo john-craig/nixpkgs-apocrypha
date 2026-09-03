@@ -1,11 +1,4 @@
-# opencode-agent-runner Specification
-
-## Purpose
-
-Provides one predictable command for launching a configured OpenCode agent with a
-specific target directory and prompt, reducing manual environment-selection steps.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Run an agent against a directory
 
@@ -42,15 +35,7 @@ environment root without silently falling back to an unintended configuration.
 - **WHEN** direct flake execution cannot locate its generated agent environments
 - **THEN** it SHALL report the missing environment and exit without invoking OpenCode
 
-### Requirement: Runner preserves agent permissions
-
-The command SHALL use the selected generated environment without silently enabling
-additional tools or bypassing that agent's configured permissions. Any OpenCode approval
-or denial behavior SHALL remain observable to the user.
-
-#### Scenario: Restricted architect invocation
-- **WHEN** the runner launches `software-architect` against a project
-- **THEN** the session SHALL retain the architect's non-mutating permissions
+## ADDED Requirements
 
 ### Requirement: Direct flake execution exposes generated environments
 

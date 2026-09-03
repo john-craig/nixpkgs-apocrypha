@@ -6,9 +6,6 @@
 }: let
   cfg = config.evak.opencode-agents;
   json = pkgs.formats.json {};
-  opencodeLib =
-    pkgs.lib.opencode
-      or (throw "evak.opencode-agents requires the opencode-nix overlay (pkgs.lib.opencode)");
   nameType = lib.types.strMatching "[a-z0-9][a-z0-9-]*";
   actionType = lib.types.enum [
     "allow"
@@ -173,20 +170,17 @@
     )
     cfg.agents;
   roleConfigFile = name: role:
-    opencodeLib.mkOpenCodeConfig [
-      {
-        opencode = {
-          default_agent = name;
-          agent =
-            {
-              ${name} = roleConfig name role;
-            }
-            // lib.mapAttrs (_: subagentConfig) (selected role.subagents cfg.subagents);
-          permission = cfg.permissions // role.permission;
-          mcp = lib.mapAttrs (_: mcpConfig) role.mcp;
-        };
-      }
-    ];
+    json.generate "opencode-agent-${name}.json" {
+      "$schema" = "https://opencode.ai/config.json";
+      default_agent = name;
+      agent =
+        {
+          ${name} = roleConfig name role;
+        }
+        // lib.mapAttrs (_: subagentConfig) (selected role.subagents cfg.subagents);
+      permission = cfg.permissions // role.permission;
+      mcp = lib.mapAttrs (_: mcpConfig) role.mcp;
+    };
   roleFiles =
     lib.mapAttrs' (
       name: role:

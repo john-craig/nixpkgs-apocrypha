@@ -83,3 +83,18 @@ It does not implicitly pass `--auto`; the selected agent's configured permission
 and approval behavior remains in effect. OpenCode and provider authentication are
 runtime prerequisites and can be overridden with
 `evak.opencode-agents.opencodePackage`.
+
+The same runner is available directly from this flake, without Home Manager
+activation. It packages all generated agent environments and uses them by default:
+
+```console
+nix run github:john-craig/nixpkgs-apocrypha#opencode-agent -- \
+  --agent systems-architect \
+  --directory /path/to/repository \
+  --prompt 'Produce an implementation-ready design.'
+```
+
+Use `--environment-root PATH` or `OPENCODE_AGENT_ENVIRONMENT_ROOT` to select a
+separately generated environment set. The runner still requires an `opencode`
+executable and provider authentication at runtime; it does not bundle either or
+bypass the selected agent's permissions.
