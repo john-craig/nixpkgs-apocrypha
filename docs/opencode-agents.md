@@ -19,8 +19,9 @@ setting `defaultAgent` or invoking OpenCode with
 The migrated roles are `default`, `developer`, `software-architect`, `orchestrator`,
 `audiovisual-design-assistant`, `disk-jockey`, `librarian`, `market-researcher`,
 `note-taker`, `project-manager`, `remote-systems-diagnostics-assistant`,
-`researcher`, `retrospective`, `systems-architect`, `toolsmith`, and
-`voice-assistant`. Shared skills and rules are selected explicitly per role.
+`researcher`, `retrospective`, `systems-architect`, `toolsmith`,
+`voice-assistant`, and `deployment-specialist`. Shared skills and rules are
+selected explicitly per role.
 
 | Panoply source environment | OpenCode environment |
 | --- | --- |
@@ -40,6 +41,7 @@ The migrated roles are `default`, `developer`, `software-architect`, `orchestrat
 | `systems-architect` | `environments/systems-architect.json` |
 | `toolsmith` | `environments/toolsmith.json` |
 | `voice-assistant` | `environments/voice-assistant.json` |
+| `deployment-specialist` | `environments/deployment-specialist.json` |
 
 Codex launcher homes, `model_reasoning_effort`, session lifecycle behavior, and
 project-home isolation have no direct OpenCode equivalent. Model names are

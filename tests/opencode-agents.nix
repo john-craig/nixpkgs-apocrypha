@@ -55,6 +55,7 @@
   config = enabled.".config/opencode/opencode-agents.json".source;
   architectConfig = enabled.".config/opencode/environments/software-architect.json".source;
   developerConfig = enabled.".config/opencode/environments/developer.json".source;
+  deploymentConfig = enabled.".config/opencode/environments/deployment-specialist.json".source;
   restrictedDeveloperConfig =
     (eval true {
       config.evak.opencode-agents.agents.developer.permission = {
@@ -84,7 +85,7 @@
 in
   assert disabled == {};
   assert disabledPackages == [];
-  assert builtins.length (builtins.attrNames enabled) >= 16;
+  assert builtins.length (builtins.attrNames enabled) >= 17;
   assert builtins.length enabledPackages == 1;
   assert builtins.all (item: item.assertion) (eval true {}).config.assertions;
   assert builtins.any (item: !item.assertion) invalidAuth.assertions;
@@ -100,6 +101,7 @@ in
       } >/dev/null
           jq -e '.agent["software-architect"].model == "openai/gpt-5.6-sol" and .agent["software-architect"].permission.edit == "deny" and .agent["software-architect"].permission.bash == "deny"' ${architectConfig} >/dev/null
           jq -e '.agent.developer.permission["*"] == "allow"' ${developerConfig} >/dev/null
+          jq -e '.agent["deployment-specialist"].model == "openai/gpt-5.6-sol" and .agent["deployment-specialist"].permission.bash == "ask" and .agent["deployment-specialist"].permission.edit == "deny" and (.agent["deployment-specialist"].description | contains("alucard"))' ${deploymentConfig} >/dev/null
           jq -e '.agent.developer.permission["*"] == "deny" and .agent.developer.permission.read == "allow"' ${restrictedDeveloperConfig} >/dev/null
           test -x ${runner}/bin/opencode-agent
 
@@ -126,7 +128,7 @@ in
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/missing" --prompt test 2>/dev/null
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" --prompt "" 2>/dev/null
           test ! -e "$home/invocation-0"
-          test ${builtins.toString (builtins.length (builtins.attrNames enabled))} -ge 16
+          test ${builtins.toString (builtins.length (builtins.attrNames enabled))} -ge 17
           ! grep -q 'super-secret' ${config}
           touch $out
     ''

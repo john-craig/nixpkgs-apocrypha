@@ -72,6 +72,32 @@
       execute, authorize, or add context. Confirm the target session and sensitive action
       with the user before forwarding.
     '';
+    deployment = ''
+      Use this skill for Panoply deployment, build, start, and image-install operations.
+
+      Always operate from the Panoply repository root and set
+      PANOPLY_REPOSITORY=$(pwd) before invoking alucard. Use the repository as the flake
+      source rather than relying on an inherited working directory:
+
+      - Host deployment: alucard deploy host <host> --flake $PANOPLY_REPOSITORY --target remote --type development
+      - Cluster deployment: alucard deploy cluster --flake $PANOPLY_REPOSITORY --type development
+      - User deployment: alucard deploy user --flake $PANOPLY_REPOSITORY --type development
+      - Personal-computer deployment: $PANOPLY_REPOSITORY/configurations/personal-computers/install.sh
+      - Machine build: alucard build machine --flake $PANOPLY_REPOSITORY
+      - Machine start: alucard start machine
+      - Image build: alucard build image --flake $PANOPLY_REPOSITORY
+      - Image install: alucard install image
+
+      Inspect the repository and target before acting. Require explicit approval immediately
+      before state-changing deployment or installation commands. For long-running commands,
+      stream output and retain the complete log with tee, then filter visible diagnostics for
+      warning, error, failed, or fatal lines with grep. Check the original command exit status
+      separately because grep can mask it. Use --trace or explicitly empty --overrides or
+      --overlays values when needed by the command's supported interface.
+
+      Never expose credentials or secret contents. Report the exact repository, target,
+      command, exit status, log path, relevant diagnostics, and rollback or verification steps.
+    '';
   };
   rules = {
     no-mutation = "Never mutate state unless the role prompt explicitly permits an approved operation; never delete a task without separate explicit authorization.";
@@ -153,6 +179,26 @@ in {
         // {
           permission = lib.mkDefault {"*" = "allow";};
           subagents = ["testing"];
+        };
+      deployment-specialist =
+        (role "Builds and deploys Panoply configurations with alucard." "openai/gpt-5.6-sol" (
+          prompt "Deployment Specialist" "Inspect the Panoply configuration repository, build or deploy the requested host, cluster, user, machine, or image with alucard, and return bounded diagnostics and verification or rollback guidance."
+        ))
+        // {
+          skills = [
+            "deployment"
+            "evidence"
+          ];
+          permission = {
+            "*" = "ask";
+            read = "allow";
+            list = "allow";
+            glob = "allow";
+            grep = "allow";
+            bash = "ask";
+            edit = "deny";
+            task = "deny";
+          };
         };
       software-architect =
         role "Designs implementation-ready specifications without applying them." "openai/gpt-5.6-sol" (
