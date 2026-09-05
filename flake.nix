@@ -55,6 +55,7 @@
           environment_dir="$(dirname "$(cat "$capture/config")")"
           for agent in \
             audiovisual-design-assistant default deployment-specialist disk-jockey developer godot-game-developer \
+            podcast-writer research-source-collector \
             librarian market-researcher note-taker orchestrator project-manager researcher \
             remote-systems-diagnostics-assistant retrospective software-architect systems-architect \
             toolsmith voice-assistant; do

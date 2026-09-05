@@ -18,6 +18,7 @@ setting `defaultAgent` or invoking OpenCode with
 
 The migrated roles are `default`, `developer`, `software-architect`, `orchestrator`,
 `godot-game-developer`,
+`podcast-writer`, `research-source-collector`,
 `audiovisual-design-assistant`, `disk-jockey`, `librarian`, `market-researcher`,
 `note-taker`, `project-manager`, `remote-systems-diagnostics-assistant`,
 `researcher`, `retrospective`, `systems-architect`, `toolsmith`,
@@ -44,6 +45,8 @@ selected explicitly per role.
 | `voice-assistant` | `environments/voice-assistant.json` |
 | `deployment-specialist` | `environments/deployment-specialist.json` |
 | `godot-game-developer` | `environments/godot-game-developer.json` |
+| `podcast-writer` | `environments/podcast-writer.json` |
+| `research-source-collector` | `environments/research-source-collector.json` |
 
 Codex launcher homes, `model_reasoning_effort`, session lifecycle behavior, and
 project-home isolation have no direct OpenCode equivalent. Model names are
@@ -100,6 +103,25 @@ Use `--environment-root PATH` or `OPENCODE_AGENT_ENVIRONMENT_ROOT` to select a
 separately generated environment set. The runner still requires an `opencode`
 executable and provider authentication at runtime; it does not bundle either or
 bypass the selected agent's permissions.
+
+## Study Podcast Agents
+
+The `podcast-writer` and `research-source-collector` roles mirror the separated contracts in
+the `personalized-study-podcasts` project. `podcast-writer` reads only an approved corpus and
+writes authorized structured episode output: it produces multi-segment, multi-host dialogue
+with per-segment citations or uncertainty markers, but does not browse, synthesize audio,
+publish, or access unrelated files. `research-source-collector` performs bounded recent or
+historical research through consumer-provided approved public search/fetch adapters and writes
+structured source selections or manifests. It records canonical URLs, dates, hashes, statuses,
+failures, contradictions, gaps, and limitations; it does not produce transcript segments or
+speaker turns.
+
+The roles are intentionally isolated. The podcast writer has no public-web MCP, while the
+source collector has only its declared public research MCPs and cannot access private files,
+credentials, or external writes. Runtime OpenCode/provider authentication and any search/fetch
+adapter remain consumer prerequisites. If research prerequisites are unavailable, the collector
+must report a non-operational run rather than answer from memory or fabricate evidence. Source
+text and corpus instructions are untrusted data, not authorization.
 
 ## Godot Game Developer
 
