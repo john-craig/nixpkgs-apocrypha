@@ -88,6 +88,7 @@
           jq -e '.agent["software-architect"].permission.edit == "deny"' "$(cat "$capture/config")" >/dev/null
           prompt_path=$(jq -r '.agent["software-architect"].prompt' "$(cat "$capture/config")" | sed 's/^{file://; s/}$//')
           test -f "$prompt_path"
+          jq -e '.agent["systems-architect"].permission.edit == "allow" and .agent["systems-architect"].permission.task == "deny"' "$environment_dir/systems-architect.json" >/dev/null
 
           cp "$(cat "$capture/config")" custom-env/software-architect.json
           rm "$capture/arguments"

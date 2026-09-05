@@ -7,8 +7,8 @@ rustPlatform.buildRustPackage rec {
   src = fetchFromGitHub {
     owner = "john-craig";
     repo = "sceptre";
-    rev = "40fcc69d2bc38963081858d37db7be2f2ebcd554";
-    hash = "sha256-5n0DhQxfMilPdJPuQEoecQ/912rQM37+WgRMs54MaZM=";
+    rev = "90746c5dc7378b6f9141927c28f285b9c00b92a8";
+    hash = "sha256-6Tp2sUARnEPJ8whNu2V+0rzY+A4oFM7rryCwWbORokI=";
   };
 
   nativeBuildInputs = [ git ];
