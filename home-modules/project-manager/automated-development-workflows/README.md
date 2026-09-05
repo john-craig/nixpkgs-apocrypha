@@ -313,3 +313,36 @@ Use the consolidated command only after reviewing the worktree and verifying
 that its configured `tea` and SSH credentials target the intended Polymirror
 repository. It is intended for a worktree whose changes are ready to publish;
 the implementation agent must still not commit, push, or open the PR itself.
+
+## Run an OpenSpec implementation workflow
+
+The `homeModules.projectManagerAutomatedDevelopmentWorkflowsImplementor`
+module installs `openspec-implementor`. It selects an active, incomplete
+OpenSpec change, creates an isolated `feature/<change>` worktree, runs the
+matching OpenCode agent, archives the change, and opens a pull request:
+
+```nix
+{
+  imports = [ inputs.nixpkgs-apocrypha.homeModules.projectManagerAutomatedDevelopmentWorkflowsImplementor ];
+  evak.project-manager.automated-development-workflows.implementor.enable = true;
+}
+```
+
+```console
+openspec-implementor --upstream https://github.com/owner/project.git
+openspec-implementor --upstream https://gitea.example/owner/project.git --change developer-add-cache
+```
+
+The command uses `openspec list --json` and `openspec status --json` for change
+selection. A change beginning with a configured agent name, such as
+`software-architect-add-cache`, selects that agent; other names use
+`developer`. Open pull requests for the matching feature branch are skipped;
+use `--force` to rerun implementation, but the command still avoids creating a
+duplicate pull request. Use `--keep-worktree` after a failure to preserve the
+temporary clone for diagnosis.
+
+GitHub publication requires authenticated `gh`; Gitea publication requires
+authenticated `tea`. Git transport uses the upstream URL and the user's SSH or
+HTTPS configuration. The workflow does not embed credentials or invoke
+Sceptre's Grimoire-specific `specset publish` command because arbitrary
+repository-local OpenSpec changes do not have a Grimoire manifest.

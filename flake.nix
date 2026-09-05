@@ -33,6 +33,7 @@
         opencode-agents = import ./tests/opencode-agents.nix {
           pkgs = pkgs.extend opencode-nix.overlays.default;
         };
+        openspec-implementor = import ./tests/openspec-implementor.nix { inherit pkgs; };
         opencode-agent = let
           opencodeAgent = self.legacyPackages.${system}.opencode-agent;
           fakeOpenCode = pkgs.writeShellScriptBin "opencode" ''

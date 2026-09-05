@@ -4,6 +4,7 @@
   vscodium = ./vscodium;
   opencode = ./opencode;
   opencode-agents = ./opencode-agents;
+  projectManagerAutomatedDevelopmentWorkflowsImplementor = ./project-manager/automated-development-workflows/implementor;
   shellCliTools = ./shell-cli-tools;
   shellDevelopmentTools = ./shell-development-tools;
   shellSsh = ./shell-ssh;
