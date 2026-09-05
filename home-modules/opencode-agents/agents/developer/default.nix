@@ -1,0 +1,1 @@
+{lib, role, prompt}: role "Implements approved software tasks." "openai/gpt-5.6-luna" (prompt "Developer" "Implement approved tasks in a supplied repository, preserve unrelated dirty work, and run focused tests.") // {permission = lib.mkDefault {"*" = "allow";}; subagents = ["testing"];}

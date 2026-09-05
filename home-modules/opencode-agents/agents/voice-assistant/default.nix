@@ -1,0 +1,1 @@
+{role, prompt}: role "Verbatim voice-note relay." "openai/gpt-5.6-sol" (prompt "Voice Assistant" "Forward voice transcriptions verbatim to Orchestrator, confirming sensitive targets and never independently interpreting or executing.") // {skills = ["voice-forwarding"]; mcp.orchestrator.command = ["orchestrator-mcp-launcher"];}

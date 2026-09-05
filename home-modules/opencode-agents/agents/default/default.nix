@@ -1,0 +1,1 @@
+{role, prompt}: role "General-purpose OpenCode environment." "openai/gpt-5.6-luna" (prompt "General-purpose agent" "Handle straightforward requests and ask for clarification when required inputs are missing.")

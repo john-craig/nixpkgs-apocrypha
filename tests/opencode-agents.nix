@@ -80,7 +80,30 @@
   runnerEval = eval true {
     config.evak.opencode-agents.opencodePackage = fakeOpenCode;
   };
-  runnerWithFake = builtins.head runnerEval.config.home.packages;
+   runnerWithFake = builtins.head runnerEval.config.home.packages;
+  expectedAgents = [
+    "default"
+    "developer"
+    "deployment-specialist"
+    "software-architect"
+    "orchestrator"
+    "audiovisual-design-assistant"
+    "godot-game-developer"
+    "podcast-writer"
+    "research-source-collector"
+    "disk-jockey"
+    "librarian"
+    "market-researcher"
+    "note-taker"
+    "project-manager"
+    "remote-systems-diagnostics-assistant"
+    "researcher"
+    "retrospective"
+    "systems-architect"
+    "toolsmith"
+    "voice-assistant"
+  ];
+  generatedAgentPaths = map (name: ".config/opencode/environments/${name}.json") expectedAgents;
   remoteSkill =
     enabled.".config/opencode/environments/remote-systems-diagnostics-assistant/skills/remote-diagnostics/SKILL.md".text;
   touchdesignerSkill =
@@ -91,10 +114,12 @@
     enabled.".config/opencode/environments/podcast-writer/skills/podcast-writing/SKILL.md".text;
   researchCollectorSkill =
     enabled.".config/opencode/environments/research-source-collector/skills/research-source-collection/SKILL.md".text;
-in
-  assert disabled == {};
-  assert disabledPackages == [];
+ in
+   assert disabled == {};
+   assert disabledPackages == [];
+  assert builtins.attrNames (eval true {}).config.evak.opencode-agents.agents == builtins.sort builtins.lessThan expectedAgents;
   assert builtins.length (builtins.attrNames enabled) >= 18;
+  assert builtins.all (path: builtins.hasAttr path enabled) generatedAgentPaths;
   assert builtins.length enabledPackages == 1;
   assert builtins.all (item: item.assertion) (eval true {}).config.assertions;
   assert builtins.any (item: !item.assertion) invalidAuth.assertions;

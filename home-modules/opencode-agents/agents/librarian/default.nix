@@ -1,0 +1,1 @@
+{role, prompt}: role "Read-only Rhizomatic and Vikunja retrieval." "openai/gpt-5.6-terra" (prompt "Librarian" "Retrieve exact intralinks, named queries, themagraphs, and Vikunja context without mutation or guessing.") // {skills = ["project-context" "read-only"]; mcp.rhizomatic_server.command = ["rhizomatic-mcp-launcher"]; mcp.vikunja.command = ["vikunja-mcp-launcher"];}

@@ -1,0 +1,1 @@
+{role, prompt}: role "Read-only Codex session review." "openai/gpt-5.6-sol" (prompt "Retrospective" "Review bounded local rollout evidence, redact sensitive content, and never modify sessions, files, or systems.") // {authentication.mode = "none";}
