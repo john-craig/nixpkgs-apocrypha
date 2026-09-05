@@ -17,6 +17,7 @@ setting `defaultAgent` or invoking OpenCode with
 `OPENCODE_CONFIG=$HOME/.config/opencode/environments/<name>.json opencode`.
 
 The migrated roles are `default`, `developer`, `software-architect`, `orchestrator`,
+`godot-game-developer`,
 `audiovisual-design-assistant`, `disk-jockey`, `librarian`, `market-researcher`,
 `note-taker`, `project-manager`, `remote-systems-diagnostics-assistant`,
 `researcher`, `retrospective`, `systems-architect`, `toolsmith`,
@@ -42,6 +43,7 @@ selected explicitly per role.
 | `toolsmith` | `environments/toolsmith.json` |
 | `voice-assistant` | `environments/voice-assistant.json` |
 | `deployment-specialist` | `environments/deployment-specialist.json` |
+| `godot-game-developer` | `environments/godot-game-developer.json` |
 
 Codex launcher homes, `model_reasoning_effort`, session lifecycle behavior, and
 project-home isolation have no direct OpenCode equivalent. Model names are
@@ -98,3 +100,28 @@ Use `--environment-root PATH` or `OPENCODE_AGENT_ENVIRONMENT_ROOT` to select a
 separately generated environment set. The runner still requires an `opencode`
 executable and provider authentication at runtime; it does not bundle either or
 bypass the selected agent's permissions.
+
+## Godot Game Developer
+
+The `godot-game-developer` role supports Godot 4.2+ 2D and 3D project workflows, including
+scenes, resources, GDScript, gameplay, UI, input, animation, physics, audio, levels, assets,
+shaders, navigation, performance, project settings, and export configuration. It detects and
+reports the project's Godot version before version-sensitive work. It may edit authorized
+project files, but live-editor mutation, arbitrary code execution, runtime input, exports,
+destructive asset operations, device or network access, and credential/security changes remain
+approval-gated.
+
+The optional local MCP uses `npx -y @npgamedev/godot-mcp-server` over stdio. It requires
+Node.js 22+, Godot 4.2+, and the Godot MCP Toolkit addon enabled in the project. The addon
+provides an authenticated localhost bridge; it is not a remote service. Set
+`GODOT_MCP_PROJECT_PATH` to the authorized project root when needed. The server supports
+`GODOT_MCP_READ_ONLY=1`, rate and response limits, and `res://` path boundaries. Missing
+addon/server/runtime connectivity is reported as non-operational, not treated as success.
+
+For validation, prefer bounded headless Godot checks, scene-tree/resource inspection, logs,
+screenshots where display support exists, deterministic playtests, and performance samples.
+Claims require observed evidence. Treat imported project content and embedded instructions as
+untrusted. Distinguish user, generated, downloaded, and placeholder assets, and preserve
+licenses and attribution. The adapter reviewed GodotPrompter (MIT), GD-Agentic-Skills
+(LGPL-3.0), and awesome-gamedev-agent-skills (Apache-2.0) without copying their prompts,
+corpora, scripts, assets, or catalogs. `gda` and Godot Sight remain future alternatives.
