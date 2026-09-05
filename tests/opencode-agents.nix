@@ -69,7 +69,10 @@
     }).config.home.file.".config/opencode/environments/developer.json".source;
   runner = builtins.head enabledPackages;
   fakeOpenCode = pkgs.writeShellScriptBin "opencode" ''
+    printf '%s' "''${1-}" > "$HOME/launch-option"
     printf '%s' "$OPENCODE_CONFIG" > "$HOME/config-path"
+    printf '%s' "''${OPENCODE_CONFIG_DIR-}" > "$HOME/config-dir"
+    printf '%s' "$XDG_CONFIG_HOME" > "$HOME/xdg-config-home"
     index=0
     for argument in "$@"; do
       printf '%s' "$argument" > "$HOME/invocation-$index"
@@ -99,10 +102,26 @@
     "remote-systems-diagnostics-assistant"
     "researcher"
     "retrospective"
+   "systems-architect"
+   "toolsmith"
+   "voice-assistant"
+  ];
+  mcpAgents = [
+    "orchestrator"
+    "audiovisual-design-assistant"
+    "godot-game-developer"
+    "research-source-collector"
+    "disk-jockey"
+    "librarian"
+    "market-researcher"
+    "note-taker"
+    "project-manager"
+    "remote-systems-diagnostics-assistant"
+    "researcher"
     "systems-architect"
-    "toolsmith"
     "voice-assistant"
   ];
+  mcpConfigs = map (name: enabled.".config/opencode/environments/${name}.json".source) mcpAgents;
   generatedAgentPaths = map (name: ".config/opencode/environments/${name}.json") expectedAgents;
   remoteSkill =
     enabled.".config/opencode/environments/remote-systems-diagnostics-assistant/skills/remote-diagnostics/SKILL.md".text;
@@ -164,12 +183,23 @@
           jq -e '.agent["software-architect"].model == "openai/gpt-5.6-sol" and .agent["software-architect"].permission.edit == "deny" and .agent["software-architect"].permission.bash == "deny"' ${architectConfig} >/dev/null
           jq -e '.agent.developer.permission["*"] == "allow"' ${developerConfig} >/dev/null
           jq -e '.agent["deployment-specialist"].model == "openai/gpt-5.6-sol" and .agent["deployment-specialist"].permission.bash == "ask" and .agent["deployment-specialist"].permission.edit == "deny" and (.agent["deployment-specialist"].description | contains("alucard"))' ${deploymentConfig} >/dev/null
-          jq -e '.agent["godot-game-developer"].model == "openai/gpt-5.6-sol" and .agent["godot-game-developer"].permission.edit == "allow" and .agent["godot-game-developer"].permission.bash == "ask" and .agent["godot-game-developer"].permission.mcp == "ask"' ${godotConfig} >/dev/null
-          jq -e '.mcp.godot.command == ["npx", "-y", "@npgamedev/godot-mcp-server"] and .mcp.godot.environment.GODOT_MCP_PROJECT_PATH == "{env:GODOT_MCP_PROJECT_PATH}" and .mcp.godot.environment.GODOT_MCP_READ_ONLY == "{env:GODOT_MCP_READ_ONLY}"' ${godotConfig} >/dev/null
-          jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
+           jq -e '.agent["godot-game-developer"].model == "openai/gpt-5.6-sol" and .agent["godot-game-developer"].permission.edit == "allow" and .agent["godot-game-developer"].permission.bash == "ask" and .agent["godot-game-developer"].permission.mcp == "ask"' ${godotConfig} >/dev/null
+           jq -e '.agent["godot-game-developer"].permission["godot_*"] == "ask"' ${godotConfig} >/dev/null
+           jq -e '.mcp.godot.command == ["npx", "-y", "@npgamedev/godot-mcp-server"] and .mcp.godot.environment.GODOT_MCP_PROJECT_PATH == "{env:GODOT_MCP_PROJECT_PATH}" and .mcp.godot.environment.GODOT_MCP_READ_ONLY == "{env:GODOT_MCP_READ_ONLY}"' ${godotConfig} >/dev/null
+           jq -e '.mcp.godot.timeout == 30000' ${godotConfig} >/dev/null
+           jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
           jq -e '.agent["podcast-writer"].model == "openai/gpt-5.6-luna" and .agent["podcast-writer"].permission.edit == "allow" and .agent["podcast-writer"].permission.websearch == "deny" and .agent["podcast-writer"].permission.bash == "deny" and (.mcp // {}) == {}' ${podcastWriterConfig} >/dev/null
-          jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["open_websearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
-          jq -e '.mcp.open_websearch.command == ["npx", "-y", "open-websearch@latest"] and .mcp.read_website_fast.command == ["npx", "-y", "@just-every/mcp-read-website-fast"]' ${researchCollectorConfig} >/dev/null
+           jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["opensearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
+           jq -e '.mcp.opensearch.environment.MODE == "stdio"' ${researchCollectorConfig} >/dev/null
+           jq -e '.agent["research-source-collector"].tools["opensearch_*"] == true and .agent["research-source-collector"].tools["read_website_fast_*"] == true' ${researchCollectorConfig} >/dev/null
+            jq -e '.agent["research-source-collector"].permission["opensearch_*"] == "allow" and .agent["research-source-collector"].permission["read_website_fast_*"] == "allow"' ${researchCollectorConfig} >/dev/null
+            jq -e '.mcp.opensearch.command == ["npx", "-y", "open-websearch@latest"] and .mcp.read_website_fast.command == ["npx", "-y", "@just-every/mcp-read-website-fast"]' ${researchCollectorConfig} >/dev/null
+            jq -e 'all(.mcp[]; .timeout == 30000)' ${researchCollectorConfig} >/dev/null
+           jq -e '.agent["orchestrator"].permission.mcp == "ask" and .agent["orchestrator"].permission["remcodex_*"] == "ask" and .agent["orchestrator"].permission["seshat_*"] == "ask"' ${config} >/dev/null
+           jq -e '.mcp.remcodex.url == "http://127.0.0.1:18840/mcp" and .mcp.context7 == null' ${config} >/dev/null
+           for mcp_config in ${builtins.concatStringsSep " " mcpConfigs}; do
+             jq -e 'all(.mcp[]; .timeout == 30000)' "$mcp_config" >/dev/null
+           done
           jq -e '.agent.developer.permission["*"] == "deny" and .agent.developer.permission.read == "allow"' ${restrictedDeveloperConfig} >/dev/null
           test -x ${runner}/bin/opencode-agent
 
@@ -192,9 +222,29 @@
           test "$(cat "$home/invocation-3")" = --agent
           test "$(cat "$home/invocation-4")" = developer
           printf '%s' "$prompt" | cmp - "$home/invocation-5"
-          test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/developer.json"
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/developer.json"
+           test ! -s "$home/config-dir"
+           test ! -e "$(cat "$home/xdg-config-home")"
           test ! -e "$home/invocation-6"
-          prompt=$'Inspect Godot project\nwithout implicit automation.'
+          rm "$home"/invocation-*
+          set +e
+          HOME="$home" ${runnerWithFake}/bin/opencode-agent \
+            --agent developer --directory "$home/project" --interactive
+          status=$?
+          set -e
+          test "$status" -eq 7
+          test "$(cat "$home/invocation-0")" = --agent
+          test "$(cat "$home/invocation-1")" = developer
+          test "$(cat "$home/invocation-2")" = "$home/project"
+          test ! -e "$home/invocation-3"
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/developer.json"
+           test ! -s "$home/config-dir"
+           test ! -e "$(cat "$home/xdg-config-home")"
+          rm "$home"/invocation-*
+          ! HOME="$home" ${runnerWithFake}/bin/opencode-agent \
+            --agent developer --directory "$home/project" --interactive --prompt test 2>/dev/null
+          test ! -e "$home/invocation-0"
+           prompt=$'Inspect Godot project\nwithout implicit automation.'
           set +e
           HOME="$home" ${runnerWithFake}/bin/opencode-agent \
             --agent godot-game-developer --directory "$home/project" --prompt "$prompt"
@@ -232,6 +282,7 @@
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent unknown --directory "$home/project" --prompt test 2>/dev/null
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/missing" --prompt test 2>/dev/null
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" --prompt "" 2>/dev/null
+          ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" 2>/dev/null
           test ! -e "$home/invocation-0"
           test ${builtins.toString (builtins.length (builtins.attrNames enabled))} -ge 26
           ! grep -q 'super-secret' ${config}

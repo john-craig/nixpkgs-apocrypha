@@ -79,6 +79,7 @@ let
 in
 pkgs.writeShellApplication {
   name = "opencode-agent";
+  runtimeInputs = [pkgs.bash pkgs.coreutils];
   text = ''
     set -euo pipefail
 
@@ -86,9 +87,11 @@ pkgs.writeShellApplication {
     agent=""
     directory=""
     prompt=""
+    prompt_set=0
+    interactive=0
 
     usage() {
-      printf '%s\n' 'Usage: opencode-agent [--environment-root PATH] --agent NAME --directory PATH --prompt TEXT' >&2
+      printf '%s\n' 'Usage: opencode-agent [--environment-root PATH] --agent NAME --directory PATH (--prompt TEXT | --interactive)' >&2
       exit "''${1:-2}"
     }
 
@@ -107,7 +110,12 @@ pkgs.writeShellApplication {
         --prompt)
           (($# >= 2)) || usage
           prompt="$2"
+          prompt_set=1
           shift 2
+          ;;
+        --interactive)
+          interactive=1
+          shift
           ;;
         --environment-root|--env-root)
           (($# >= 2)) || usage
@@ -136,10 +144,14 @@ pkgs.writeShellApplication {
       printf 'error: environment root is not an existing directory: %s\n' "$environment_root" >&2
       exit 2
     }
-    [[ -n "$prompt" ]] || {
+    if ((interactive && prompt_set)); then
+      printf '%s\n' 'error: --interactive cannot be combined with --prompt' >&2
+      exit 2
+    fi
+    if ((! interactive)) && [[ -z "$prompt" ]]; then
       printf '%s\n' 'error: --prompt must not be empty' >&2
       exit 2
-    }
+    fi
 
     config="$environment_root/$agent.json"
     [[ -f "$config" ]] || {
@@ -152,10 +164,27 @@ pkgs.writeShellApplication {
     }
 
     export OPENCODE_CONFIG="$config"
-    exec opencode run \
-      --dir "$directory" \
-      --agent "$agent" \
-      "$prompt"
+    isolated_config_home="$(mktemp -d)"
+    trap 'rm -rf "$isolated_config_home"' EXIT
+    export XDG_CONFIG_HOME="$isolated_config_home"
+    unset OPENCODE_CONFIG_DIR OPENCODE_CONFIG_CONTENT OPENCODE_PORT OPENCODE_HOST
+    opencode_args=()
+    opencode_path="$(command -v opencode)"
+    if grep -q 'noAttach' "$opencode_path" 2>/dev/null; then
+      opencode_args+=(--no-attach)
+    fi
+    set +e
+    if ((interactive)); then
+      opencode "''${opencode_args[@]}" --agent "$agent" "$directory"
+    else
+      opencode "''${opencode_args[@]}" run \
+        --dir "$directory" \
+        --agent "$agent" \
+        "$prompt"
+    fi
+    status=$?
+    set -e
+    exit "$status"
   '';
   meta = {
     description = "Run a generated OpenCode agent directly from the flake";

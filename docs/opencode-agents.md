@@ -83,11 +83,24 @@ opencode-agent \
   --prompt 'Implement the requested change and run the relevant tests.'
 ```
 
-The command validates the agent, directory, and prompt before starting OpenCode.
+The command validates the agent, directory, and selected invocation mode before starting OpenCode.
 It does not implicitly pass `--auto`; the selected agent's configured permission
 and approval behavior remains in effect. OpenCode and provider authentication are
 runtime prerequisites and can be overridden with
 `evak.opencode-agents.opencodePackage`.
+
+Start an interactive terminal session with the selected generated environment by
+using `--interactive` instead of `--prompt`:
+
+```console
+opencode-agent \
+  --agent developer \
+  --directory /path/to/repository \
+  --interactive
+```
+
+Interactive mode launches OpenCode's normal terminal interface; it does not enable
+automatic approval. `--interactive` and `--prompt` are mutually exclusive.
 
 The same runner is available directly from this flake, without Home Manager
 activation. It packages all generated agent environments and uses them by default:
@@ -97,6 +110,24 @@ nix run github:john-craig/nixpkgs-apocrypha#opencode-agent -- \
   --agent systems-architect \
   --directory /path/to/repository \
   --prompt 'Produce an implementation-ready design.'
+```
+
+For an interactive session directly from the flake:
+
+```console
+nix run .#opencode-agent -- \
+  --agent developer \
+  --directory /path/to/repository \
+  --interactive
+```
+
+The same command can use the published flake:
+
+```console
+nix run github:john-craig/nixpkgs-apocrypha#opencode-agent -- \
+  --agent developer \
+  --directory /path/to/repository \
+  --interactive
 ```
 
 Use `--environment-root PATH` or `OPENCODE_AGENT_ENVIRONMENT_ROOT` to select a

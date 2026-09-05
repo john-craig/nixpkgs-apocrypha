@@ -41,6 +41,11 @@
           type = lib.types.bool;
           default = true;
         };
+        timeout = lib.mkOption {
+          type = lib.types.ints.positive;
+          default = 30000;
+          description = "Milliseconds allowed for MCP tool discovery, including package startup and remote connection setup.";
+        };
         environment = lib.mkOption {
           type = lib.types.attrsOf lib.types.str;
           default = {};
@@ -132,12 +137,16 @@
         else throw "evak.opencode-agents: unknown shared definition `${name}`"
     );
 
+  mcpPermission = role: role.permission.mcp or role.permission."*" or "ask";
+  mcpPermissions = role: lib.mapAttrs' (server: _: lib.nameValuePair "${server}_*" (mcpPermission role)) role.mcp;
+
   roleConfig = name: role: {
     description = role.description;
     mode = role.mode;
     prompt = "{file:${promptFiles.${name}}}";
     model = role.model;
-    permission = role.permission;
+    permission = role.permission // mcpPermissions role;
+    tools = lib.mapAttrs' (server: _: lib.nameValuePair "${server}_*" true) role.mcp;
   };
 
   subagentConfig = profile: {
@@ -160,6 +169,7 @@
       else null;
     url = server.url;
     enabled = server.enabled;
+    timeout = server.timeout;
     environment = server.environment;
     headers = server.headers;
   };
@@ -178,7 +188,11 @@
           ${name} = roleConfig name role;
         }
         // lib.mapAttrs (_: subagentConfig) (selected role.subagents cfg.subagents);
-      permission = cfg.permissions // role.permission;
+      permission =
+        cfg.permissions
+        // role.permission
+        // mcpPermissions role;
+      tools = lib.mapAttrs' (server: _: lib.nameValuePair "${server}_*" true) role.mcp;
       mcp = lib.mapAttrs (_: mcpConfig) role.mcp;
     };
   roleFiles =
@@ -217,15 +231,18 @@
   };
   runner = pkgs.writeShellApplication {
     name = "opencode-agent";
+    runtimeInputs = [pkgs.bash pkgs.coreutils];
     text = ''
       set -euo pipefail
 
       agent=""
       directory=""
       prompt=""
+      prompt_set=0
+      interactive=0
 
       usage() {
-        printf 'Usage: opencode-agent --agent NAME --directory PATH --prompt TEXT\n' >&2
+        printf 'Usage: opencode-agent --agent NAME --directory PATH (--prompt TEXT | --interactive)\n' >&2
         exit 2
       }
 
@@ -244,7 +261,12 @@
           --prompt)
             (($# >= 2)) || usage
             prompt="$2"
+            prompt_set=1
             shift 2
+            ;;
+          --interactive)
+            interactive=1
+            shift
             ;;
           --help|-h)
             usage
@@ -264,10 +286,14 @@
         printf 'error: --directory is not an existing directory: %s\n' "$directory" >&2
         exit 2
       }
-      [[ -n "$prompt" ]] || {
+      if ((interactive && prompt_set)); then
+        printf 'error: --interactive cannot be combined with --prompt\n' >&2
+        exit 2
+      fi
+      if ((! interactive)) && [[ -z "$prompt" ]]; then
         printf 'error: --prompt must not be empty\n' >&2
         exit 2
-      }
+      fi
 
       config="$HOME/.config/opencode/environments/$agent.json"
       [[ -f "$config" ]] || {
@@ -276,10 +302,22 @@
       }
 
       export OPENCODE_CONFIG="$config"
-      exec ${cfg.opencodePackage}/bin/opencode run \
-        --dir "$directory" \
-        --agent "$agent" \
-        "$prompt"
+      isolated_config_home="$(mktemp -d)"
+      trap 'rm -rf "$isolated_config_home"' EXIT
+      export XDG_CONFIG_HOME="$isolated_config_home"
+      unset OPENCODE_CONFIG_DIR OPENCODE_CONFIG_CONTENT OPENCODE_PORT OPENCODE_HOST
+      set +e
+      if ((interactive)); then
+        ${cfg.opencodePackage}/bin/opencode --agent "$agent" "$directory"
+      else
+        ${cfg.opencodePackage}/bin/opencode run \
+            --dir "$directory" \
+            --agent "$agent" \
+            "$prompt"
+      fi
+      status=$?
+      set -e
+      exit "$status"
     '';
   };
 in {

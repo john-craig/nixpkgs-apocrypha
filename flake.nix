@@ -36,7 +36,17 @@
         opencode-agent = let
           opencodeAgent = self.legacyPackages.${system}.opencode-agent;
           fakeOpenCode = pkgs.writeShellScriptBin "opencode" ''
+            noAttach=false
+            if [[ ''${1-} == --no-attach && ''${2-} == --help ]]; then
+              exit 0
+            fi
+            printf '%s' "''${1-}" > "$CAPTURE/launch-option"
+            if [[ ''${1-} == --no-attach ]]; then
+              shift
+            fi
             printf '%s' "$OPENCODE_CONFIG" > "$CAPTURE/config"
+            printf '%s' "''${OPENCODE_CONFIG_DIR-}" > "$CAPTURE/config-dir"
+            printf '%s' "$XDG_CONFIG_HOME" > "$CAPTURE/xdg-config-home"
             printf '%s\n' "$@" > "$CAPTURE/arguments"
           '';
         in pkgs.runCommand "opencode-agent-check" {
@@ -51,8 +61,13 @@
           export CAPTURE="$capture"
 
           opencode-agent --agent software-architect --directory "$PWD/project" --prompt 'Preserve exact prompt.'
-          test -f "$capture/config"
-          environment_dir="$(dirname "$(cat "$capture/config")")"
+           test -f "$capture/config"
+           test "$(cat "$capture/launch-option")" = --no-attach
+           test -f "$capture/config-dir"
+           test -f "$capture/xdg-config-home"
+           environment_dir="$(dirname "$(cat "$capture/config")")"
+           test ! -s "$capture/config-dir"
+           test ! -e "$(cat "$capture/xdg-config-home")"
           for agent in \
             audiovisual-design-assistant default deployment-specialist disk-jockey developer godot-game-developer \
             podcast-writer research-source-collector \
