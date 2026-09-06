@@ -53,6 +53,7 @@
         --provider NAME      Override provider inference (github or gitea)
         --base BRANCH       Override the upstream default branch
         --model MODEL       Override the OpenCode model for the agent
+        --status-file PATH  Write success, no-work, or failure for callers
         --work-root PATH     Parent directory for temporary workflow state
         --keep-worktree      Preserve temporary state after a failure
         --help               Show this help
@@ -60,6 +61,9 @@
       }
 
       error() {
+        if [[ -n "$status_file" ]]; then
+          printf '%s\n' failure >"$status_file" || true
+        fi
         printf 'openspec-implementor: %s\n' "$*" >&2
         exit 1
       }
@@ -69,6 +73,7 @@
       provider="${cfg.provider}"
       base_branch="${cfg.baseBranch}"
       model=""
+      status_file=""
       base_override=false
       work_root="${if cfg.workRoot == null then "" else cfg.workRoot}"
       keep_worktree="${lib.boolToString cfg.keepWorktree}"
@@ -103,6 +108,11 @@
           --model)
             (($# >= 2)) || error '--model requires a provider/model identifier'
             model="$2"
+            shift 2
+            ;;
+          --status-file)
+            (($# >= 2)) || error '--status-file requires a path'
+            status_file="$2"
             shift 2
             ;;
           --work-root)
@@ -217,6 +227,7 @@
       fi
 
       if ((''${#candidates[@]} == 0)); then
+        [[ -z "$status_file" ]] || printf '%s\n' no-work >"$status_file"
         printf '%s\n' 'No active OpenSpec changes found.'
         exit 0
       fi
@@ -270,6 +281,7 @@
       done
 
       [[ -n "$selected_change" ]] || {
+        [[ -z "$status_file" ]] || printf '%s\n' no-work >"$status_file"
         printf '%s\n' 'No eligible OpenSpec changes without pending pull requests.'
         exit 0
       }
@@ -351,6 +363,7 @@
               jq -r '.[0].html_url // .[0].url // .[0].web_url'
             ;;
         esac
+        [[ -z "$status_file" ]] || printf '%s\n' success >"$status_file"
         exit 0
       fi
 
@@ -364,6 +377,7 @@
           tea pulls create --repo "$repository_path" --head "$branch" --base "$base_branch" --title "$title" --description "$body"
           ;;
       esac
+      [[ -z "$status_file" ]] || printf '%s\n' success >"$status_file"
     '';
   };
 in {

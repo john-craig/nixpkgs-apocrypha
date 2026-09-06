@@ -362,3 +362,46 @@ The flake package supplies Git, jq, OpenSpec, OpenCode, the packaged
 `opencode-agent` environments, `gh`, and `tea`. GitHub/Gitea credentials and
 Git transport authentication remain runtime requirements. Direct execution has
 the same publishing behavior as the Home Manager command; it is not a dry run.
+
+## Schedule OpenSpec implementation
+
+The scheduler module installs a Linux `systemd.user` oneshot service and timer.
+It selects configured repositories in round-robin order and delegates each
+implementation attempt to `openspec-implementor`:
+
+```nix
+{
+  imports = [ inputs.nixpkgs-apocrypha.homeModules.projectManagerAutomatedDevelopmentWorkflowsImplementorScheduler ];
+  evak.project-manager.automated-development-workflows.implementor-scheduler = {
+    enable = true;
+    interval = "6h";
+    retryOnFailure = false;
+    upstreams = [
+      {
+        url = "https://github.com/owner/project.git";
+        provider = "github";
+        baseBranch = "main";
+      }
+      {
+        url = "https://gitea.example/owner/project.git";
+        provider = "gitea";
+        baseBranch = "main";
+      }
+    ];
+  };
+}
+```
+
+The scheduler advances its private cursor after selecting a repository. If that
+repository has no eligible OpenSpec change, it immediately tries the next
+repository. When `retryOnFailure` is enabled, an implementation failure restores
+the failed repository as the next cursor; no-work results never retry the same
+repository within the next period. A non-blocking process lock skips a timer
+period while an earlier implementation is still running.
+
+The cursor is stored below the systemd state directory and the lock below its
+runtime directory. Set `persistent = true` only when missed timer periods should
+be replayed after the user session returns. Generic OpenSpec repositories use the
+implementor's authenticated `gh` or `tea` provider operations; the current
+Sceptre `specset` commands are intentionally not used because they require a
+Grimoire catalog and manifest.

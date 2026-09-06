@@ -37,6 +37,7 @@
         };
         openspec-implementor = import ./tests/openspec-implementor.nix { inherit pkgs; };
         openspec-implementor-flake = import ./tests/openspec-implementor-flake.nix { inherit pkgs; };
+        openspec-implementor-scheduler = import ./tests/openspec-implementor-scheduler.nix { inherit pkgs; };
         opencode-agent = let
           opencodeAgent = self.legacyPackages.${system}.opencode-agent;
           fakeOpenCode = pkgs.writeShellScriptBin "opencode" ''
