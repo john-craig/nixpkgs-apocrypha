@@ -68,12 +68,13 @@
            environment_dir="$(dirname "$(cat "$capture/config")")"
            test ! -s "$capture/config-dir"
            test ! -e "$(cat "$capture/xdg-config-home")"
-          for agent in \
-            audiovisual-design-assistant default deployment-specialist disk-jockey developer godot-game-developer \
-            podcast-writer research-source-collector \
-            librarian market-researcher note-taker orchestrator project-manager researcher \
-            remote-systems-diagnostics-assistant retrospective software-architect systems-architect \
-            toolsmith voice-assistant; do
+           for agent in \
+             audiovisual-design-assistant default deployment-specialist disk-jockey developer blender-3d-modeler \
+             godot-game-developer \
+             podcast-writer research-source-collector \
+             librarian market-researcher note-taker orchestrator project-manager researcher \
+             remote-systems-diagnostics-assistant retrospective software-architect systems-architect \
+             toolsmith voice-assistant; do
             test -f "$environment_dir/$agent.json"
             test -f "$environment_dir/$agent/prompt.md"
           done

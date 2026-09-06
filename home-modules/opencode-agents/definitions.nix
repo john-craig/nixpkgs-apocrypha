@@ -11,6 +11,7 @@
     podcast-writer = ./agents/podcast-writer;
     research-source-collector = ./agents/research-source-collector;
     disk-jockey = ./agents/disk-jockey;
+    blender-3d-modeler = ./agents/blender-3d-modeler;
     librarian = ./agents/librarian;
     market-researcher = ./agents/market-researcher;
     note-taker = ./agents/note-taker;

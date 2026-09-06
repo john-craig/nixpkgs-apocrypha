@@ -1,10 +1,4 @@
-# opencode-agent-environments Specification
-
-## Purpose
-
-Provides reproducible, named OpenCode agent environments that preserve role-specific behavior while making prompts, tools, policies, and model settings independently configurable through Home Manager.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Dedicated public Home Manager module
 

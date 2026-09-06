@@ -56,9 +56,10 @@
   architectConfig = enabled.".config/opencode/environments/software-architect.json".source;
   developerConfig = enabled.".config/opencode/environments/developer.json".source;
   deploymentConfig = enabled.".config/opencode/environments/deployment-specialist.json".source;
-  godotConfig = enabled.".config/opencode/environments/godot-game-developer.json".source;
-  podcastWriterConfig = enabled.".config/opencode/environments/podcast-writer.json".source;
-  researchCollectorConfig = enabled.".config/opencode/environments/research-source-collector.json".source;
+   godotConfig = enabled.".config/opencode/environments/godot-game-developer.json".source;
+   blenderConfig = enabled.".config/opencode/environments/blender-3d-modeler.json".source;
+   podcastWriterConfig = enabled.".config/opencode/environments/podcast-writer.json".source;
+   researchCollectorConfig = enabled.".config/opencode/environments/research-source-collector.json".source;
   restrictedDeveloperConfig =
     (eval true {
       config.evak.opencode-agents.agents.developer.permission = {
@@ -90,9 +91,10 @@
     "deployment-specialist"
     "software-architect"
     "orchestrator"
-    "audiovisual-design-assistant"
-    "godot-game-developer"
-    "podcast-writer"
+     "audiovisual-design-assistant"
+     "blender-3d-modeler"
+     "godot-game-developer"
+     "podcast-writer"
     "research-source-collector"
     "disk-jockey"
     "librarian"
@@ -109,8 +111,9 @@
   mcpAgents = [
     "orchestrator"
     "audiovisual-design-assistant"
-    "godot-game-developer"
-    "research-source-collector"
+     "godot-game-developer"
+     "blender-3d-modeler"
+     "research-source-collector"
     "disk-jockey"
     "librarian"
     "market-researcher"
@@ -131,8 +134,10 @@
     enabled.".config/opencode/environments/godot-game-developer/skills/godot-development/SKILL.md".text;
   podcastSkill =
     enabled.".config/opencode/environments/podcast-writer/skills/podcast-writing/SKILL.md".text;
-  researchCollectorSkill =
-    enabled.".config/opencode/environments/research-source-collector/skills/research-source-collection/SKILL.md".text;
+   researchCollectorSkill =
+     enabled.".config/opencode/environments/research-source-collector/skills/research-source-collection/SKILL.md".text;
+   blenderSkill =
+     enabled.".config/opencode/environments/blender-3d-modeler/skills/blender-modeling/SKILL.md".text;
  in
    assert disabled == {};
    assert disabledPackages == [];
@@ -169,9 +174,22 @@
   assert builtins.match ".*contradictions.*" researchCollectorSkill != null;
   assert builtins.match ".*non-operational.*" researchCollectorSkill != null;
   assert builtins.match ".*memory.*" researchCollectorSkill != null;
-  assert builtins.match ".*fabricate.*" researchCollectorSkill != null;
-  assert !builtins.hasAttr ".config/opencode/environments/podcast-writer/skills/research-source-collection/SKILL.md" enabled;
-  assert !builtins.hasAttr ".config/opencode/environments/research-source-collector/skills/podcast-writing/SKILL.md" enabled;
+   assert builtins.match ".*fabricate.*" researchCollectorSkill != null;
+   assert builtins.match ".*3D modeling.*" blenderSkill != null;
+   assert builtins.match ".*geometry.*" blenderSkill != null;
+   assert builtins.match ".*modifiers.*" blenderSkill != null;
+   assert builtins.match ".*geometry nodes.*" blenderSkill != null;
+   assert builtins.match ".*UV.*" blenderSkill != null;
+   assert builtins.match ".*rigging.*" blenderSkill != null;
+   assert builtins.match ".*rendering.*" blenderSkill != null;
+   assert builtins.match ".*untrusted.*" blenderSkill != null;
+   assert builtins.match ".*provenance.*" blenderSkill != null;
+   assert builtins.match ".*approval.*" blenderSkill != null;
+   assert builtins.match ".*non-operational.*" blenderSkill != null;
+   assert builtins.match ".*Blender 3\.0\+.*" blenderSkill != null;
+   assert builtins.match ".*uvx blender-mcp.*" blenderSkill != null;
+   assert !builtins.hasAttr ".config/opencode/environments/podcast-writer/skills/research-source-collection/SKILL.md" enabled;
+   assert !builtins.hasAttr ".config/opencode/environments/research-source-collector/skills/podcast-writing/SKILL.md" enabled;
     pkgs.runCommand "opencode-agents-test" {nativeBuildInputs = [pkgs.jq];} ''
           jq -e '."$schema" == "https://opencode.ai/config.json" and .default_agent == "orchestrator" and .agent.orchestrator.model == "openai/gpt-5.6-sol" and .agent.requirements.mode == "subagent" and .mcp.remcodex.headers.Authorization == "Bearer {env:REMCODEX_MCP_API_TOKEN}"' ${config} >/dev/null
           jq -e '(.mcp // {}) == {}' ${
@@ -187,8 +205,12 @@
            jq -e '.agent["godot-game-developer"].permission["godot_*"] == "ask"' ${godotConfig} >/dev/null
            jq -e '.mcp.godot.command == ["npx", "-y", "@npgamedev/godot-mcp-server"] and .mcp.godot.environment.GODOT_MCP_PROJECT_PATH == "{env:GODOT_MCP_PROJECT_PATH}" and .mcp.godot.environment.GODOT_MCP_READ_ONLY == "{env:GODOT_MCP_READ_ONLY}"' ${godotConfig} >/dev/null
            jq -e '.mcp.godot.timeout == 30000' ${godotConfig} >/dev/null
-           jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
-          jq -e '.agent["podcast-writer"].model == "openai/gpt-5.6-luna" and .agent["podcast-writer"].permission.edit == "allow" and .agent["podcast-writer"].permission.websearch == "deny" and .agent["podcast-writer"].permission.bash == "deny" and (.mcp // {}) == {}' ${podcastWriterConfig} >/dev/null
+            jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
+            jq -e '.agent["blender-3d-modeler"].model == "openai/gpt-5.6-sol" and .agent["blender-3d-modeler"].permission.edit == "allow" and .agent["blender-3d-modeler"].permission.bash == "deny" and .agent["blender-3d-modeler"].permission.mcp == "ask"' ${blenderConfig} >/dev/null
+            jq -e '.agent["blender-3d-modeler"].permission["python_*"] == "deny"' ${blenderConfig} >/dev/null
+            jq -e '.mcp.blender.command == ["uvx", "blender-mcp"] and .mcp.blender.timeout == 30000' ${blenderConfig} >/dev/null
+            jq -e '(.mcp | keys) == ["blender"]' ${blenderConfig} >/dev/null
+            jq -e '.agent["podcast-writer"].model == "openai/gpt-5.6-luna" and .agent["podcast-writer"].permission.edit == "allow" and .agent["podcast-writer"].permission.websearch == "deny" and .agent["podcast-writer"].permission.bash == "deny" and (.mcp // {}) == {}' ${podcastWriterConfig} >/dev/null
            jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["opensearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
            jq -e '.mcp.opensearch.environment.MODE == "stdio"' ${researchCollectorConfig} >/dev/null
            jq -e '.agent["research-source-collector"].tools["opensearch_*"] == true and .agent["research-source-collector"].tools["read_website_fast_*"] == true' ${researchCollectorConfig} >/dev/null
@@ -205,10 +227,11 @@
 
           home=$(mktemp -d)
           mkdir -p "$home/project" "$home/.config/opencode/environments"
-          touch "$home/.config/opencode/environments/developer.json"
-          touch "$home/.config/opencode/environments/godot-game-developer.json"
-          touch "$home/.config/opencode/environments/podcast-writer.json"
-          touch "$home/.config/opencode/environments/research-source-collector.json"
+           touch "$home/.config/opencode/environments/developer.json"
+           touch "$home/.config/opencode/environments/godot-game-developer.json"
+           touch "$home/.config/opencode/environments/blender-3d-modeler.json"
+           touch "$home/.config/opencode/environments/podcast-writer.json"
+           touch "$home/.config/opencode/environments/research-source-collector.json"
           prompt=$'Preserve "quoted" text\nand whitespace.'
           set +e
           HOME="$home" ${runnerWithFake}/bin/opencode-agent \
@@ -257,34 +280,34 @@
           test "$(cat "$home/invocation-4")" = godot-game-developer
           printf '%s' "$prompt" | cmp - "$home/invocation-5"
           test ! -e "$home/invocation-6"
-          test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/godot-game-developer.json"
-          prompt=$'Write only the cited episode JSON.'
-          set +e
-          HOME="$home" ${runnerWithFake}/bin/opencode-agent \
-            --agent podcast-writer --directory "$home/project" --prompt "$prompt"
-          status=$?
-          set -e
-          test "$status" -eq 7
-          test "$(cat "$home/invocation-4")" = podcast-writer
-          printf '%s' "$prompt" | cmp - "$home/invocation-5"
-          test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/podcast-writer.json"
-          prompt=$'Collect only approved public sources.'
-          set +e
-          HOME="$home" ${runnerWithFake}/bin/opencode-agent \
-            --agent research-source-collector --directory "$home/project" --prompt "$prompt"
-          status=$?
-          set -e
-          test "$status" -eq 7
-          test "$(cat "$home/invocation-4")" = research-source-collector
-          printf '%s' "$prompt" | cmp - "$home/invocation-5"
-          test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/research-source-collector.json"
-          rm "$home"/invocation-*
-          ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent unknown --directory "$home/project" --prompt test 2>/dev/null
-          ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/missing" --prompt test 2>/dev/null
-          ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" --prompt "" 2>/dev/null
-          ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" 2>/dev/null
-          test ! -e "$home/invocation-0"
-          test ${builtins.toString (builtins.length (builtins.attrNames enabled))} -ge 26
-          ! grep -q 'super-secret' ${config}
-          touch $out
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/godot-game-developer.json"
+           prompt=$'Write only the cited episode JSON.'
+           set +e
+           HOME="$home" ${runnerWithFake}/bin/opencode-agent \
+             --agent podcast-writer --directory "$home/project" --prompt "$prompt"
+           status=$?
+           set -e
+           test "$status" -eq 7
+           test "$(cat "$home/invocation-4")" = podcast-writer
+           printf '%s' "$prompt" | cmp - "$home/invocation-5"
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/podcast-writer.json"
+           prompt=$'Build only the approved Blender scene.'
+           set +e
+           HOME="$home" ${runnerWithFake}/bin/opencode-agent \
+             --agent blender-3d-modeler --directory "$home/project" --prompt "$prompt"
+           status=$?
+           set -e
+           test "$status" -eq 7
+           test "$(cat "$home/invocation-4")" = blender-3d-modeler
+           printf '%s' "$prompt" | cmp - "$home/invocation-5"
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/blender-3d-modeler.json"
+           rm "$home"/invocation-*
+           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent unknown --directory "$home/project" --prompt test 2>/dev/null
+           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/missing" --prompt test 2>/dev/null
+           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" --prompt "" 2>/dev/null
+           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" 2>/dev/null
+           test ! -e "$home/invocation-0"
+           test ${builtins.toString (builtins.length (builtins.attrNames enabled))} -ge 27
+           ! grep -q 'super-secret' ${config}
+           touch $out
     ''
