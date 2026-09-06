@@ -89,6 +89,7 @@ pkgs.writeShellApplication {
     prompt=""
     prompt_set=0
     interactive=0
+    model=""
 
     usage() {
       printf '%s\n' 'Usage: opencode-agent [--environment-root PATH] --agent NAME --directory PATH (--prompt TEXT | --interactive)' >&2
@@ -116,6 +117,11 @@ pkgs.writeShellApplication {
         --interactive)
           interactive=1
           shift
+          ;;
+        --model)
+          (($# >= 2)) || usage
+          model="$2"
+          shift 2
           ;;
         --environment-root|--env-root)
           (($# >= 2)) || usage
@@ -168,6 +174,10 @@ pkgs.writeShellApplication {
     trap 'rm -rf "$isolated_config_home"' EXIT
     export XDG_CONFIG_HOME="$isolated_config_home"
     unset OPENCODE_CONFIG_DIR OPENCODE_CONFIG_CONTENT OPENCODE_PORT OPENCODE_HOST
+    model_args=()
+    if [[ -n "$model" ]]; then
+      model_args=(--model "$model")
+    fi
     opencode_args=()
     opencode_path="$(command -v opencode)"
     if grep -q 'noAttach' "$opencode_path" 2>/dev/null; then
@@ -180,6 +190,7 @@ pkgs.writeShellApplication {
       opencode "''${opencode_args[@]}" run \
         --dir "$directory" \
         --agent "$agent" \
+        "''${model_args[@]}" \
         "$prompt"
     fi
     status=$?

@@ -32,6 +32,8 @@
     name = "openspec-implementor";
     runtimeInputs = lib.filter (package: package != null) [
       cfg.gitPackage
+      cfg.awkPackage
+      cfg.findutilsPackage
       cfg.jqPackage
       cfg.openspecPackage
       cfg.opencodeAgentPackage
@@ -50,6 +52,7 @@
         --force              Ignore an existing pending pull request
         --provider NAME      Override provider inference (github or gitea)
         --base BRANCH       Override the upstream default branch
+        --model MODEL       Override the OpenCode model for the agent
         --work-root PATH     Parent directory for temporary workflow state
         --keep-worktree      Preserve temporary state after a failure
         --help               Show this help
@@ -65,6 +68,7 @@
       requested_change=""
       provider="${cfg.provider}"
       base_branch="${cfg.baseBranch}"
+      model=""
       base_override=false
       work_root="${if cfg.workRoot == null then "" else cfg.workRoot}"
       keep_worktree="${lib.boolToString cfg.keepWorktree}"
@@ -94,6 +98,11 @@
             (($# >= 2)) || error '--base requires a branch'
             base_branch="$2"
             base_override=true
+            shift 2
+            ;;
+          --model)
+            (($# >= 2)) || error '--model requires a provider/model identifier'
+            model="$2"
             shift 2
             ;;
           --work-root)
@@ -281,8 +290,14 @@
 
       Inspect the repository and the change artifacts before editing. Implement
       every required task, run focused tests and relevant repository checks, and
-      preserve unrelated work. When implementation and validation are complete,
+      preserve unrelated work. Before archiving, run git diff --check and remove
+      all trailing whitespace and blank lines at end of file. When implementation
+      and validation are complete,
       run: openspec archive $selected_change --yes
+
+      After the archive succeeds and the focused checks pass, stop immediately.
+      Do not use task-tracking tools, repeat checks, reformat unrelated files, or
+      perform additional investigation.
 
       Do not commit, push, open a pull request, deploy, mutate external systems,
       or change unrelated files. The calling workflow handles publication. If
@@ -291,7 +306,11 @@
       EOF
       )
 
-      opencode-agent --agent "$selected_agent" --directory "$agent_worktree" --prompt "$prompt"
+      agent_args=(--agent "$selected_agent" --directory "$agent_worktree" --prompt "$prompt")
+      if [[ -n "$model" ]]; then
+        agent_args+=(--model "$model")
+      fi
+      opencode-agent "''${agent_args[@]}"
       [[ ! -d "$agent_worktree/openspec/changes/$selected_change" ]] ||
         error "OpenSpec change was not archived: $selected_change"
       archived_change=$(find "$agent_worktree/openspec/changes/archive" -mindepth 1 -maxdepth 1 \
@@ -305,7 +324,22 @@
       git -C "$agent_worktree" diff --cached --check
       git -C "$agent_worktree" diff --cached --quiet && error 'agent produced no changes to publish'
       git -C "$agent_worktree" commit -m "Implement OpenSpec change $selected_change" >/dev/null
-      git -C "$agent_worktree" push --set-upstream origin "$branch" >/dev/null
+      if [[ "$provider" == github ]]; then
+        git_askpass="$work_dir/git-askpass"
+        # Keep the askpass script's positional parameter literal.
+        # shellcheck disable=SC2016
+        printf '%s\n' \
+          '#!/bin/sh' \
+          'case "$1" in' \
+          '  *Username*) printf "%s\\n" x-access-token ;;' \
+          '  *Password*) gh auth token ;;' \
+          'esac' >"$git_askpass"
+        chmod 700 "$git_askpass"
+        GIT_ASKPASS="$git_askpass" GIT_TERMINAL_PROMPT=0 \
+          git -C "$agent_worktree" push --set-upstream origin "$branch" >/dev/null
+      else
+        git -C "$agent_worktree" push --set-upstream origin "$branch" >/dev/null
+      fi
 
       if pending_pr "$branch"; then
         case "$provider" in
@@ -339,6 +373,16 @@ in {
       type = lib.types.nullOr lib.types.package;
       default = packageFor "git";
       description = "Git package used for repository and worktree operations.";
+    };
+    awkPackage = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = packageFor "gawk";
+      description = "Awk package used to resolve the upstream default branch.";
+    };
+    findutilsPackage = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = packageFor "findutils";
+      description = "Findutils package used to verify archived OpenSpec changes.";
     };
     jqPackage = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
@@ -400,6 +444,14 @@ in {
       {
         assertion = cfg.jqPackage != null;
         message = "implementor requires jq; set evak.project-manager.automated-development-workflows.implementor.jqPackage.";
+      }
+      {
+        assertion = cfg.awkPackage != null;
+        message = "implementor requires awk; set evak.project-manager.automated-development-workflows.implementor.awkPackage.";
+      }
+      {
+        assertion = cfg.findutilsPackage != null;
+        message = "implementor requires findutils; set evak.project-manager.automated-development-workflows.implementor.findutilsPackage.";
       }
       {
         assertion = cfg.openspecPackage != null;

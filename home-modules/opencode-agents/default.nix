@@ -240,6 +240,7 @@
       prompt=""
       prompt_set=0
       interactive=0
+      model=""
 
       usage() {
         printf 'Usage: opencode-agent --agent NAME --directory PATH (--prompt TEXT | --interactive)\n' >&2
@@ -267,6 +268,11 @@
           --interactive)
             interactive=1
             shift
+            ;;
+          --model)
+            (($# >= 2)) || usage
+            model="$2"
+            shift 2
             ;;
           --help|-h)
             usage
@@ -306,6 +312,10 @@
       trap 'rm -rf "$isolated_config_home"' EXIT
       export XDG_CONFIG_HOME="$isolated_config_home"
       unset OPENCODE_CONFIG_DIR OPENCODE_CONFIG_CONTENT OPENCODE_PORT OPENCODE_HOST
+      model_args=()
+      if [[ -n "$model" ]]; then
+        model_args=(--model "$model")
+      fi
       set +e
       if ((interactive)); then
         ${cfg.opencodePackage}/bin/opencode --agent "$agent" "$directory"
@@ -313,6 +323,7 @@
         ${cfg.opencodePackage}/bin/opencode run \
             --dir "$directory" \
             --agent "$agent" \
+            "''${model_args[@]}" \
             "$prompt"
       fi
       status=$?

@@ -8,16 +8,18 @@
   outputs = { self, nixpkgs, opencode-nix }:
     let
       forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
+      pkgsFor = system: import nixpkgs {
+        inherit system;
+        overlays = [ opencode-nix.overlays.default ];
+      };
     in
     {
-      legacyPackages = forAllSystems (system: import ./default.nix {
-        pkgs = import nixpkgs { inherit system; };
-      });
+      legacyPackages = forAllSystems (system: import ./default.nix { pkgs = pkgsFor system; });
       packages = forAllSystems (system: nixpkgs.lib.filterAttrs (_: v: nixpkgs.lib.isDerivation v) self.legacyPackages.${system});
       nixosModules = import ./nixos-modules;
       homeModules = import ./home-modules;
       overlays.opencode-nix = opencode-nix.overlays.default;
-      checks = forAllSystems (system: let pkgs = import nixpkgs { inherit system; }; in {
+      checks = forAllSystems (system: let pkgs = pkgsFor system; in {
         sceptre = pkgs.runCommand "sceptre-check" {
           nativeBuildInputs = [ self.legacyPackages.${system}.sceptre ];
         } ''
@@ -34,6 +36,7 @@
           pkgs = pkgs.extend opencode-nix.overlays.default;
         };
         openspec-implementor = import ./tests/openspec-implementor.nix { inherit pkgs; };
+        openspec-implementor-flake = import ./tests/openspec-implementor-flake.nix { inherit pkgs; };
         opencode-agent = let
           opencodeAgent = self.legacyPackages.${system}.opencode-agent;
           fakeOpenCode = pkgs.writeShellScriptBin "opencode" ''
@@ -89,7 +92,7 @@
           jq -e '.agent["software-architect"].permission.edit == "deny"' "$(cat "$capture/config")" >/dev/null
           prompt_path=$(jq -r '.agent["software-architect"].prompt' "$(cat "$capture/config")" | sed 's/^{file://; s/}$//')
           test -f "$prompt_path"
-          jq -e '.agent["systems-architect"].permission.edit == "allow" and .agent["systems-architect"].permission.task == "deny"' "$environment_dir/systems-architect.json" >/dev/null
+           jq -e '.agent["systems-architect"].permission["context7_*"] == "ask" and .agent["systems-architect"].permission["git_mcp_*"] == "ask"' "$environment_dir/systems-architect.json" >/dev/null
 
           cp "$(cat "$capture/config")" custom-env/software-architect.json
           rm "$capture/arguments"

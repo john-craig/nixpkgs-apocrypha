@@ -346,3 +346,19 @@ authenticated `tea`. Git transport uses the upstream URL and the user's SSH or
 HTTPS configuration. The workflow does not embed credentials or invoke
 Sceptre's Grimoire-specific `specset publish` command because arbitrary
 repository-local OpenSpec changes do not have a Grimoire manifest.
+
+The same command is available directly from this flake without Home Manager
+activation:
+
+```console
+nix run .#openspec-implementor -- --help
+nix run .#openspec-implementor -- \
+  --upstream https://github.com/owner/project.git \
+  --change developer-add-cache \
+  --model openai/gpt-5.5
+```
+
+The flake package supplies Git, jq, OpenSpec, OpenCode, the packaged
+`opencode-agent` environments, `gh`, and `tea`. GitHub/Gitea credentials and
+Git transport authentication remain runtime requirements. Direct execution has
+the same publishing behavior as the Home Manager command; it is not a dry run.
