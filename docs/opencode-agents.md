@@ -10,6 +10,48 @@ Import `homeModules.opencode-agents` and apply the repository overlay:
 }
 ```
 
+## NixOS User Module
+
+For a NixOS system managed with Home Manager, `nixosModules.opencodeAgentsUser`
+can create a dedicated user and compose both OpenCode home modules for that
+user. The Home Manager NixOS module must also be imported, and OpenCode must be
+available through the repository overlay or an explicit package setting:
+
+```nix
+{ inputs, pkgs, ... }:
+{
+  imports = [
+    inputs.home-manager.nixosModules.home-manager
+    inputs.nixpkgs-apocrypha.nixosModules.opencodeAgentsUser
+  ];
+
+  nixpkgs.overlays = [ inputs.nixpkgs-apocrypha.overlays.opencode-nix ];
+
+  evak.opencodeAgentsUser = {
+    enable = true;
+    username = "opencode";
+    user = {
+      description = "OpenCode agent user";
+      extraGroups = [ "wheel" ];
+      shell = pkgs.bashInteractive;
+    };
+    homeManager = {
+      home.stateVersion = "24.11";
+      evak.opencode.theme = "synthwave-84";
+      evak.opencode-agents.defaultAgent = "developer";
+    };
+  };
+}
+```
+
+The module targets only `users.users.opencode` and
+`home-manager.users.opencode`. It always imports and enables
+`homeModules.opencode` and `homeModules.opencode-agents`; other settings in
+`homeManager` remain customizable. Set
+`homeManager.evak.opencode-agents.opencodePackage` when the OpenCode package is
+not available in `pkgs`. Changing `username` targets a different account but
+does not delete the previous system user.
+
 The module generates `.config/opencode/environments/<name>.json`, role-local
 `prompt.md`, `skills/<name>/SKILL.md`, and `rules/<name>.md`. The default role is
 also written to `.config/opencode/opencode-agents.json`; select another role by

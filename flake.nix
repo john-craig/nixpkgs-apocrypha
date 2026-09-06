@@ -35,6 +35,9 @@
         opencode-agents = import ./tests/opencode-agents.nix {
           pkgs = pkgs.extend opencode-nix.overlays.default;
         };
+        opencode-agents-user = import ./tests/opencode-agents-user.nix {
+          pkgs = pkgs.extend opencode-nix.overlays.default;
+        };
         openspec-implementor = import ./tests/openspec-implementor.nix { inherit pkgs; };
         openspec-implementor-flake = import ./tests/openspec-implementor-flake.nix { inherit pkgs; };
         openspec-implementor-scheduler = import ./tests/openspec-implementor-scheduler.nix { inherit pkgs; };
