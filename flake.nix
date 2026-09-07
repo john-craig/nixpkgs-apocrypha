@@ -99,7 +99,7 @@
             podcast-writer research-source-collector \
             librarian market-researcher note-taker orchestrator project-manager researcher \
             remote-systems-diagnostics-assistant retrospective software-architect systems-architect \
-            toolsmith voice-assistant; do
+            toolsmith voice-assistant nutritionist; do
             test -f "$environment_dir/$agent.json"
             test -f "$environment_dir/$agent/prompt.md"
           done

@@ -21,6 +21,7 @@
     systems-architect = ./agents/systems-architect;
     toolsmith = ./agents/toolsmith;
     voice-assistant = ./agents/voice-assistant;
+    nutritionist = ./agents/nutritionist;
   };
   agents = lib.mapAttrs (
     _: source:

@@ -75,7 +75,7 @@ The migrated roles are `default`, `developer`, `software-architect`, `orchestrat
 `audiovisual-design-assistant`, `disk-jockey`, `librarian`, `market-researcher`,
 `note-taker`, `project-manager`, `remote-systems-diagnostics-assistant`,
 `researcher`, `retrospective`, `systems-architect`, `toolsmith`,
-`voice-assistant`, and `deployment-specialist`. Shared skills and rules are
+`voice-assistant`, `deployment-specialist`, and `nutritionist`. Shared skills and rules are
 selected explicitly per role.
 
 | Panoply source environment | OpenCode environment |
@@ -100,6 +100,7 @@ selected explicitly per role.
 | `godot-game-developer` | `environments/godot-game-developer.json` |
 | `podcast-writer` | `environments/podcast-writer.json` |
 | `research-source-collector` | `environments/research-source-collector.json` |
+| `nutritionist` | `environments/nutritionist.json` |
 
 Codex launcher homes, `model_reasoning_effort`, session lifecycle behavior, and
 project-home isolation have no direct OpenCode equivalent. Model names are
@@ -241,3 +242,20 @@ untrusted. Distinguish user, generated, downloaded, and placeholder assets, and 
 licenses and attribution. The adapter reviewed GodotPrompter (MIT), GD-Agentic-Skills
 (LGPL-3.0), and awesome-gamedev-agent-skills (Apache-2.0) without copying their prompts,
 corpora, scripts, assets, or catalogs. `gda` and Godot Sight remain future alternatives.
+
+## Nutritionist
+
+Invoke the read-only nutrition role with `--agent nutritionist`. It supports general nutrition
+education, source-grounded recipe research, and conditional non-clinical meal planning. Personalized
+calorie targets, restrictive plans, and condition-specific guidance require a focused suitability
+screen; incomplete intake stays non-personalized. Pregnancy or lactation, eating-disorder signs,
+significant disease, medication interactions, surgery-related needs, severe allergy risk, vulnerable
+age, or other material ambiguity receive a qualified-clinician referral. Urgent symptoms or possible
+allergic emergencies should be directed to local emergency or urgent clinical services.
+
+The role uses only the declared read-only `opensearch` and `read_website_fast` research adapters.
+They are consumer-provided prerequisites, not proof of availability. An unconfigured food database
+or recipe service must be reported as unavailable rather than claimed as queried. Sources should be
+authoritative and dated, with estimates, conflicts, uncertainty, and missing evidence identified.
+The role cannot edit, run commands, access secrets, persist a health profile, or write external
+records; health information remains only in the explicitly requested project context.

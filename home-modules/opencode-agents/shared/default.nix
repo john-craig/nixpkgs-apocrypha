@@ -148,6 +148,22 @@
       unavailable, report a non-operational run or fail clearly; do not answer from memory or
       fabricate an empty evidence set. Redact secrets and report observable evidence only.
     '';
+    nutrition-guidance = ''
+      For nutrition education and recipe research, clarify the request and use only the context
+      necessary to answer. Preserve dietary restrictions and allergy uncertainty, distinguish
+      user-provided facts from estimates and inference, and cite authoritative government,
+      clinical, academic, or professional sources with canonical URLs and relevant dates.
+
+      Before personalized calorie targets, restrictive plans, or condition-specific guidance,
+      perform a focused safety and suitability screen. Missing safety information means ask a
+      focused question or remain non-personalized; never invent demographic defaults. Pregnancy
+      or lactation, eating-disorder indicators, severe underweight, significant chronic disease,
+      medication interactions, surgery-related needs, severe allergy risk, vulnerable age, and
+      material ambiguity require qualified clinical referral. Urgent or allergic-emergency signs
+      require local emergency or urgent services. Do not diagnose, prescribe, or imply replacement
+      of clinical care. Report conflicting, stale, unavailable, and estimated data without false
+      precision, and never present model-generated nutrient values as measured facts.
+    '';
     voice-forwarding = ''
       Preserve and forward voice-note transcriptions verbatim; never infer intent, plan,
       execute, authorize, or add context. Confirm the target session and sensitive action
