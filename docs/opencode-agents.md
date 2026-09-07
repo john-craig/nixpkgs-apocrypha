@@ -100,7 +100,7 @@ The migrated roles are `default`, `developer`, `software-architect`, `orchestrat
 `audiovisual-design-assistant`, `disk-jockey`, `librarian`, `market-researcher`,
 `note-taker`, `project-manager`, `remote-systems-diagnostics-assistant`,
 `researcher`, `retrospective`, `systems-architect`, `toolsmith`,
-`voice-assistant`, and `deployment-specialist`. Shared skills and rules are
+    `voice-assistant`, `personal-trainer`, and `deployment-specialist`. Shared skills and rules are
 selected explicitly per role.
 
 | Panoply source environment | OpenCode environment |
@@ -125,6 +125,7 @@ selected explicitly per role.
 | `godot-game-developer` | `environments/godot-game-developer.json` |
 | `podcast-writer` | `environments/podcast-writer.json` |
 | `research-source-collector` | `environments/research-source-collector.json` |
+| `personal-trainer` | `environments/personal-trainer.json` |
 
 Codex launcher homes, `model_reasoning_effort`, session lifecycle behavior, and
 project-home isolation have no direct OpenCode equivalent. Model names are
@@ -150,6 +151,31 @@ the module if a narrower policy is required:
   };
 }
 ```
+
+## Personal Trainer
+
+Invoke the read-only `personal-trainer` environment with the generated path above or with the
+runner using `--agent personal-trainer`. It supports general exercise education and planning for
+strength, conditioning, mobility, general fitness, and mixed goals. Personalized plans require
+goal, experience, equipment, schedule, preferences, limitations, and recovery context; missing
+context is requested rather than silently assumed. Plans cover warm-ups, cooldowns,
+sets/repetitions or time, intensity, rest, substitutions, progression, deloads, and recovery.
+
+The role has bounded web research only. It does not log workouts, persist health records,
+synchronize wearables, calendars, devices, or training services, access secrets, or claim
+unavailable tools are operational. It does not diagnose, prescribe rehabilitation, or grant
+medical clearance. Injury, illness, pregnancy/postpartum concerns, cardiovascular or neurological
+symptoms, medication constraints, eating-disorder indicators, clinician restrictions, and other
+ambiguous risks require conservative general information and qualified-professional referral;
+urgent symptoms require local urgent or emergency services. Material claims should use
+authoritative exercise, sports-medicine, or public-health sources with provenance and dates.
+User-entered, observed, calculated, estimated, and recommended values remain distinct, with
+assumptions shown for estimates.
+
+`workout-claw`, `life-state`, wger, Intervals.icu, Garmin Connect, and TrainingPeaks are future
+integration candidates only. Each requires separate privacy, licensing, credential, and mutation
+review; no such integration is configured by this role, and unclear-license code, media, or data
+is not copied.
 
 When the module is enabled, it also installs an `opencode-agent` command that
 selects a generated environment and runs OpenCode against a target directory:

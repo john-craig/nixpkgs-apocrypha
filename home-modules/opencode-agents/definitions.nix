@@ -14,6 +14,7 @@
     librarian = ./agents/librarian;
     market-researcher = ./agents/market-researcher;
     note-taker = ./agents/note-taker;
+    personal-trainer = ./agents/personal-trainer;
     project-manager = ./agents/project-manager;
     remote-systems-diagnostics-assistant = ./agents/remote-systems-diagnostics-assistant;
     researcher = ./agents/researcher;
