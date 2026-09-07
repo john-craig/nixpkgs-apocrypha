@@ -57,11 +57,36 @@ available through the repository overlay or an explicit package setting:
 
 The module targets only `users.users.opencode` and
 `home-manager.users.opencode`. It always imports and enables
-`homeModules.opencode` and `homeModules.opencode-agents`; other settings in
-`homeManager` remain customizable. Set
+`homeModules.opencode` and `homeModules.opencode-agents`, and imports the
+optional implementor scheduler; other settings in `homeManager` remain
+customizable. The scheduler remains disabled unless explicitly enabled. Set
 `homeManager.evak.opencode-agents.opencodePackage` when the OpenCode package is
 not available in `pkgs`. Changing `username` targets a different account but
 does not delete the previous system user.
+
+To schedule unattended OpenSpec implementation, configure the existing Home
+Manager scheduler through the user's `homeManager` attribute:
+
+```nix
+{
+  evak.opencodeAgentsUser.homeManager = {
+    evak.project-manager.automated-development-workflows.implementor-scheduler = {
+      enable = true;
+      upstreams = [
+        { url = "https://github.com/example/project.git"; }
+      ];
+      interval = "6h";
+      persistent = false;
+      retryOnFailure = true;
+    };
+  };
+}
+```
+
+The scheduler uses its existing `implementorPackage`, `flockPackage`,
+`model`, `workRoot`, `keepWorktree`, `stateFile`, and `lockFile` options. It
+creates the `evak-openspec-implementor-scheduler` user service and timer only
+when `enable = true`; valid upstream and package configuration is required.
 
 The module generates `.config/opencode/environments/<name>.json`, role-local
 `prompt.md`, `skills/<name>/SKILL.md`, and `rules/<name>.md`. The default role is

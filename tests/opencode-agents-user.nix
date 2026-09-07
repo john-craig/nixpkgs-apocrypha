@@ -52,6 +52,10 @@ let
                   type = lib.types.attrs;
                   default = { };
                 };
+                evak.project-manager.automated-development-workflows.implementor-scheduler = lib.mkOption {
+                  type = lib.types.attrs;
+                  default = { };
+                };
               };
             });
             default = { };
@@ -78,6 +82,11 @@ let
         evak.opencode-agents.agents.custom = {
           description = "A test agent.";
           prompt = "Do the test task.";
+        };
+        evak.project-manager.automated-development-workflows.implementor-scheduler = {
+          enable = true;
+          interval = "12h";
+          upstreams = [ { url = "https://github.com/owner/repo.git"; } ];
         };
       };
     };
@@ -165,6 +174,62 @@ let
       }
     ];
   };
+  schedulerPackage = pkgs.writeShellScriptBin "openspec-implementor" "exit 0";
+  schedulerDisabledHomeEval = pkgs.lib.evalModules {
+    specialArgs = { inherit pkgs; };
+    modules = [
+      ({ lib, ... }: {
+        options.assertions = lib.mkOption {
+          type = assertionsType;
+          default = [ ];
+        };
+        options.home.packages = lib.mkOption {
+          type = lib.types.listOf lib.types.package;
+          default = [ ];
+        };
+        options.systemd.user.services = lib.mkOption {
+          type = lib.types.attrsOf lib.types.anything;
+          default = { };
+        };
+        options.systemd.user.timers = lib.mkOption {
+          type = lib.types.attrsOf lib.types.anything;
+          default = { };
+        };
+      })
+      ../home-modules/project-manager/automated-development-workflows/implementor-scheduler
+    ];
+  };
+  schedulerHomeEval = pkgs.lib.evalModules {
+    specialArgs = { inherit pkgs; };
+    modules = [
+      ({ lib, ... }: {
+        options.home.packages = lib.mkOption {
+          type = lib.types.listOf lib.types.package;
+          default = [ ];
+        };
+        options.systemd.user.services = lib.mkOption {
+          type = lib.types.attrsOf lib.types.anything;
+          default = { };
+        };
+        options.systemd.user.timers = lib.mkOption {
+          type = lib.types.attrsOf lib.types.anything;
+          default = { };
+        };
+        options.assertions = lib.mkOption {
+          type = assertionsType;
+          default = [ ];
+        };
+      })
+      ../home-modules/project-manager/automated-development-workflows/implementor-scheduler
+      {
+        evak.project-manager.automated-development-workflows.implementor-scheduler = {
+          enable = true;
+          implementorPackage = schedulerPackage;
+          upstreams = [ { url = "https://github.com/owner/repo.git"; } ];
+        };
+      }
+    ];
+  };
   enabledAssertions = builtins.all (item: item.assertion) enabled.config.assertions;
   missingHomeManagerAssertion = builtins.head (
     builtins.filter (item: !item.assertion) missingHomeManager.config.assertions
@@ -187,8 +252,11 @@ assert !invalidUsername.success;
 assert !unsupportedUserOption.success;
 assert builtins.elem ../home-modules/opencode homeUser.imports;
 assert builtins.elem ../home-modules/opencode-agents homeUser.imports;
+assert builtins.elem ../home-modules/project-manager/automated-development-workflows/implementor-scheduler homeUser.imports;
 assert homeUser.evak.opencode.enable == true;
 assert homeUser.evak.opencode-agents.enable == true;
+assert homeUser.evak.project-manager.automated-development-workflows.implementor-scheduler.enable == true;
+assert homeUser.evak.project-manager.automated-development-workflows.implementor-scheduler.interval == "12h";
 assert homeUser.evak.opencode-agents.opencodePackage == pkgs.opencode;
 assert homeUser.evak.opencode.settings.model == "openai/test";
 assert homeUser.evak.opencode-agents.agents.custom.description == "A test agent.";
@@ -198,4 +266,9 @@ assert builtins.hasAttr ".config/opencode/opencode.json" homeFiles;
 assert builtins.hasAttr ".config/opencode/opencode-agents.json" homeFiles;
 assert builtins.hasAttr ".config/opencode/environments/custom.json" homeFiles;
 assert builtins.length homeEval.config.home.packages == 1;
+assert schedulerDisabledHomeEval.config.home.packages == [ ];
+assert schedulerDisabledHomeEval.config.systemd.user.services == { };
+assert schedulerDisabledHomeEval.config.systemd.user.timers == { };
+assert builtins.hasAttr "evak-openspec-implementor-scheduler" schedulerHomeEval.config.systemd.user.services;
+assert builtins.hasAttr "evak-openspec-implementor-scheduler" schedulerHomeEval.config.systemd.user.timers;
 pkgs.runCommand "opencode-agents-user-test" { } "touch $out"

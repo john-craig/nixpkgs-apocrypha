@@ -148,6 +148,7 @@ in
           imports = [
             ../home-modules/opencode
             ../home-modules/opencode-agents
+            ../home-modules/project-manager/automated-development-workflows/implementor-scheduler
           ];
           evak.opencode.enable = lib.mkForce true;
           evak.opencode-agents.enable = lib.mkForce true;
