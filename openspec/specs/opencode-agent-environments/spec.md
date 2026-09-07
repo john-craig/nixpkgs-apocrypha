@@ -24,13 +24,9 @@ The system SHALL expose named OpenCode environments with stable names and descri
 SHALL support selecting one environment as the default, and SHALL define the developer
 environment with autonomous edit and command execution permissions by default. Existing
 explicit permission configuration SHALL remain able to narrow or widen those defaults.
-The system SHALL provide a stable `godot-game-developer` environment with project-edit
-permissions, an explicit local Godot MCP declaration, and approval-gated or unavailable
-live-editor, arbitrary-code, export, destructive-asset, device, network, and external-write
-operations by default.
-The system SHALL provide stable `podcast-writer` and `research-source-collector` environments
-with role-local content, explicit capability boundaries, and no implicit access to unrelated
-MCP servers or private project data.
+The system SHALL provide a stable `personal-trainer` environment with read-only training
+guidance and explicit research capability, without workout-log, health-record, wearable,
+calendar, device, or external-write integrations by default.
 
 #### Scenario: Environment is selected
 - **WHEN** a configured user selects a named environment
@@ -55,6 +51,10 @@ MCP servers or private project data.
 #### Scenario: Research source collector environment is selected
 - **WHEN** a configured user selects `research-source-collector`
 - **THEN** the generated environment SHALL load only its source-collection guidance and approved public research capabilities, with transcript generation, private-file access, and external writes denied or unavailable by default
+
+#### Scenario: Personal trainer environment is selected
+- **WHEN** a configured user selects the `personal-trainer` environment without overriding its permissions
+- **THEN** the generated environment SHALL allow bounded reading, questions, and research while denying file edits, shell execution, external writes, and unrelated MCP inheritance
 
 #### Scenario: Unknown environment is selected
 - **WHEN** a user selects a name that is not configured

@@ -59,6 +59,7 @@
   godotConfig = enabled.".config/opencode/environments/godot-game-developer.json".source;
   podcastWriterConfig = enabled.".config/opencode/environments/podcast-writer.json".source;
   researchCollectorConfig = enabled.".config/opencode/environments/research-source-collector.json".source;
+  personalTrainerConfig = enabled.".config/opencode/environments/personal-trainer.json".source;
   restrictedDeveloperConfig =
     (eval true {
       config.evak.opencode-agents.agents.developer.permission = {
@@ -96,9 +97,10 @@
     "research-source-collector"
     "disk-jockey"
     "librarian"
-    "market-researcher"
-    "note-taker"
-    "project-manager"
+     "market-researcher"
+     "note-taker"
+     "personal-trainer"
+     "project-manager"
     "remote-systems-diagnostics-assistant"
     "researcher"
     "retrospective"
@@ -132,7 +134,9 @@
   podcastSkill =
     enabled.".config/opencode/environments/podcast-writer/skills/podcast-writing/SKILL.md".text;
   researchCollectorSkill =
-    enabled.".config/opencode/environments/research-source-collector/skills/research-source-collection/SKILL.md".text;
+     enabled.".config/opencode/environments/research-source-collector/skills/research-source-collection/SKILL.md".text;
+  personalTrainingSkill =
+    enabled.".config/opencode/environments/personal-trainer/skills/personal-training/SKILL.md".text;
  in
    assert disabled == {};
    assert disabledPackages == [];
@@ -169,11 +173,21 @@
   assert builtins.match ".*contradictions.*" researchCollectorSkill != null;
   assert builtins.match ".*non-operational.*" researchCollectorSkill != null;
   assert builtins.match ".*memory.*" researchCollectorSkill != null;
-  assert builtins.match ".*fabricate.*" researchCollectorSkill != null;
+   assert builtins.match ".*fabricate.*" researchCollectorSkill != null;
+   assert builtins.match ".*intake.*" personalTrainingSkill != null;
+   assert builtins.match ".*warm-up.*" personalTrainingSkill != null;
+   assert builtins.match ".*cooldown.*" personalTrainingSkill != null;
+   assert builtins.match ".*substitutions.*" personalTrainingSkill != null;
+   assert builtins.match ".*progression.*" personalTrainingSkill != null;
+   assert builtins.match ".*deload.*" personalTrainingSkill != null;
+   assert builtins.match ".*pregnancy.*" personalTrainingSkill != null;
+   assert builtins.match ".*emergency.*" personalTrainingSkill != null;
+   assert builtins.match ".*estimated.*" personalTrainingSkill != null;
+   assert builtins.match ".*untrusted.*" personalTrainingSkill != null;
   assert !builtins.hasAttr ".config/opencode/environments/podcast-writer/skills/research-source-collection/SKILL.md" enabled;
   assert !builtins.hasAttr ".config/opencode/environments/research-source-collector/skills/podcast-writing/SKILL.md" enabled;
-    pkgs.runCommand "opencode-agents-test" {nativeBuildInputs = [pkgs.jq];} ''
-          jq -e '."$schema" == "https://opencode.ai/config.json" and .default_agent == "orchestrator" and .agent.orchestrator.model == "openai/gpt-5.6-sol" and .agent.requirements.mode == "subagent" and .mcp.remcodex.headers.Authorization == "Bearer {env:REMCODEX_MCP_API_TOKEN}"' ${config} >/dev/null
+   pkgs.runCommand "opencode-agents-test" {nativeBuildInputs = [pkgs.jq];} ''
+           jq -e '."$schema" == "https://opencode.ai/config.json" and .default_agent == "orchestrator" and .agent.orchestrator.model == "openai/gpt-5.6-sol" and .agent.requirements.mode == "subagent" and .mcp.remcodex.headers.Authorization == "Bearer {env:REMCODEX_MCP_API_TOKEN}"' ${config} >/dev/null
           jq -e '(.mcp // {}) == {}' ${
         enabled.".config/opencode/environments/developer.json".source
       } >/dev/null
@@ -194,7 +208,13 @@
            jq -e '.agent["research-source-collector"].tools["opensearch_*"] == true and .agent["research-source-collector"].tools["read_website_fast_*"] == true' ${researchCollectorConfig} >/dev/null
             jq -e '.agent["research-source-collector"].permission["opensearch_*"] == "allow" and .agent["research-source-collector"].permission["read_website_fast_*"] == "allow"' ${researchCollectorConfig} >/dev/null
             jq -e '.mcp.opensearch.command == ["npx", "-y", "open-websearch@latest"] and .mcp.read_website_fast.command == ["npx", "-y", "@just-every/mcp-read-website-fast"]' ${researchCollectorConfig} >/dev/null
-            jq -e 'all(.mcp[]; .timeout == 30000)' ${researchCollectorConfig} >/dev/null
+             jq -e 'all(.mcp[]; .timeout == 30000)' ${researchCollectorConfig} >/dev/null
+           jq -e '.agent["personal-trainer"].model == "openai/gpt-5.6-luna" and .agent["personal-trainer"].permission["*"] == "deny" and .agent["personal-trainer"].permission.read == "allow" and .agent["personal-trainer"].permission.webfetch == "allow" and .agent["personal-trainer"].permission.edit == "deny" and .agent["personal-trainer"].permission.bash == "deny" and .agent["personal-trainer"].permission.task == "deny" and .agent["personal-trainer"].permission.mcp == "deny" and (.mcp // {}) == {}' ${personalTrainerConfig} >/dev/null
+           jq -e '.agent["personal-trainer"].permission.persistence == "deny" and .agent["personal-trainer"].permission.external_write == "deny" and .agent["personal-trainer"].permission.secrets == "deny"' ${personalTrainerConfig} >/dev/null
+           personal_prompt=$(jq -r '.agent["personal-trainer"].prompt' ${personalTrainerConfig} | sed 's/^{file://; s/}$//')
+           grep -F 'safety' "$personal_prompt" >/dev/null
+           grep -F 'unavailable' "$personal_prompt" >/dev/null
+           grep -F 'read-only' "$personal_prompt" >/dev/null
            jq -e '.agent["orchestrator"].permission.mcp == "ask" and .agent["orchestrator"].permission["remcodex_*"] == "ask" and .agent["orchestrator"].permission["seshat_*"] == "ask"' ${config} >/dev/null
            jq -e '.mcp.remcodex.url == "http://127.0.0.1:18840/mcp" and .mcp.context7 == null' ${config} >/dev/null
            for mcp_config in ${builtins.concatStringsSep " " mcpConfigs}; do
@@ -208,7 +228,8 @@
           touch "$home/.config/opencode/environments/developer.json"
           touch "$home/.config/opencode/environments/godot-game-developer.json"
           touch "$home/.config/opencode/environments/podcast-writer.json"
-          touch "$home/.config/opencode/environments/research-source-collector.json"
+           touch "$home/.config/opencode/environments/research-source-collector.json"
+           touch "$home/.config/opencode/environments/personal-trainer.json"
           prompt=$'Preserve "quoted" text\nand whitespace.'
           set +e
           HOME="$home" ${runnerWithFake}/bin/opencode-agent \
@@ -277,7 +298,16 @@
           test "$status" -eq 7
           test "$(cat "$home/invocation-4")" = research-source-collector
           printf '%s' "$prompt" | cmp - "$home/invocation-5"
-          test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/research-source-collector.json"
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/research-source-collector.json"
+           set +e
+           HOME="$home" ${runnerWithFake}/bin/opencode-agent \
+             --agent personal-trainer --directory "$home/project" --prompt 'Plan safely.'
+           status=$?
+           set -e
+           test "$status" -eq 7
+           test "$(cat "$home/invocation-4")" = personal-trainer
+           printf '%s' 'Plan safely.' | cmp - "$home/invocation-5"
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/personal-trainer.json"
           rm "$home"/invocation-*
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent unknown --directory "$home/project" --prompt test 2>/dev/null
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/missing" --prompt test 2>/dev/null
@@ -287,5 +317,5 @@
           test ${builtins.toString (builtins.length (builtins.attrNames enabled))} -ge 26
           grep -F '${pkgs.opencode}/bin/opencode' '${runner}/bin/opencode-agent'
           ! grep -q 'super-secret' ${config}
-          touch $out
+           mkdir -p "$out"
     ''
