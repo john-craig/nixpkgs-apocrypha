@@ -44,6 +44,10 @@ let
                   type = lib.types.bool;
                   default = false;
                 };
+                evak.opencode-agents.opencodePackage = lib.mkOption {
+                  type = lib.types.nullOr lib.types.package;
+                  default = null;
+                };
                 evak.opencode-agents.agents = lib.mkOption {
                   type = lib.types.attrs;
                   default = { };
@@ -70,6 +74,7 @@ let
         home.stateVersion = "24.11";
         evak.opencode.settings.model = "openai/test";
         evak.opencode-agents.enable = false;
+        evak.opencode-agents.opencodePackage = pkgs.opencode;
         evak.opencode-agents.agents.custom = {
           description = "A test agent.";
           prompt = "Do the test task.";
@@ -184,6 +189,7 @@ assert builtins.elem ../home-modules/opencode homeUser.imports;
 assert builtins.elem ../home-modules/opencode-agents homeUser.imports;
 assert homeUser.evak.opencode.enable == true;
 assert homeUser.evak.opencode-agents.enable == true;
+assert homeUser.evak.opencode-agents.opencodePackage == pkgs.opencode;
 assert homeUser.evak.opencode.settings.model == "openai/test";
 assert homeUser.evak.opencode-agents.agents.custom.description == "A test agent.";
 assert !missingHomeManagerAssertion.assertion;

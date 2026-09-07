@@ -1,16 +1,34 @@
 {
   description = "My personal NUR repository";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs.opencode = {
+    url = "github:anomalyco/opencode?ref=v1.18.21";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
   inputs.opencode-nix = {
     url = "github:albertov/opencode-nix";
     inputs.nixpkgs.follows = "nixpkgs";
+    inputs.opencode.follows = "opencode";
   };
-  outputs = { self, nixpkgs, opencode-nix }:
+  outputs = { self, nixpkgs, opencode, opencode-nix, ... }:
     let
+      opencodeOverlay = final: prev:
+        if builtins.hasAttr prev.stdenv.hostPlatform.system opencode.packages
+        then let
+          overlay = opencode-nix.overlays.default final prev;
+        in
+          overlay
+          // {
+            opencode = overlay.opencode.overrideAttrs (_: {
+              __intentionallyOverridingVersion = true;
+              version = "1.18.21";
+            });
+          }
+        else {};
       forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
       pkgsFor = system: import nixpkgs {
         inherit system;
-        overlays = [ opencode-nix.overlays.default ];
+        overlays = [ opencodeOverlay ];
       };
     in
     {
@@ -18,7 +36,7 @@
       packages = forAllSystems (system: nixpkgs.lib.filterAttrs (_: v: nixpkgs.lib.isDerivation v) self.legacyPackages.${system});
       nixosModules = import ./nixos-modules;
       homeModules = import ./home-modules;
-      overlays.opencode-nix = opencode-nix.overlays.default;
+      overlays.opencode-nix = opencodeOverlay;
       checks = forAllSystems (system: let pkgs = pkgsFor system; in {
         sceptre = pkgs.runCommand "sceptre-check" {
           nativeBuildInputs = [ self.legacyPackages.${system}.sceptre ];
@@ -33,10 +51,10 @@
         remaining-shell-user-configuration = import ./tests/remaining-shell-user-configuration.nix { inherit pkgs; };
         traefik-modules = import ./tests/traefik-modules.nix { inherit pkgs; };
         opencode-agents = import ./tests/opencode-agents.nix {
-          pkgs = pkgs.extend opencode-nix.overlays.default;
+          inherit pkgs;
         };
         opencode-agents-user = import ./tests/opencode-agents-user.nix {
-          pkgs = pkgs.extend opencode-nix.overlays.default;
+          inherit pkgs;
         };
         openspec-implementor = import ./tests/openspec-implementor.nix { inherit pkgs; };
         openspec-implementor-flake = import ./tests/openspec-implementor-flake.nix { inherit pkgs; };
@@ -111,6 +129,14 @@
           set -e
           test "$status" -ne 0
           test ! -e "$capture/arguments"
+          touch "$out"
+        '';
+      } // nixpkgs.lib.optionalAttrs (builtins.hasAttr system opencode.packages) {
+        opencode-package = pkgs.runCommand "opencode-package-check" {
+          nativeBuildInputs = [ pkgs.gnugrep ];
+        } ''
+          test "${pkgs.opencode.version}" = "1.18.21"
+          test -x "${pkgs.opencode}/bin/opencode"
           touch "$out"
         '';
       });

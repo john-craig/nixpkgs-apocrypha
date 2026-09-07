@@ -19,20 +19,20 @@
     "opencode": {
       "inputs": {
         "nixpkgs": [
-          "opencode-nix",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1771626013,
-        "narHash": "sha256-b74ascBNcHlXjhxRX4FgqQXJTpcYhika5ay+fx1eX90=",
+        "lastModified": 1787323855,
+        "narHash": "sha256-WKG/lts+wzDjYJ5pOZ0X4Kb0rJ1TzYQzQgjyQBY+bxs=",
         "owner": "anomalyco",
         "repo": "opencode",
-        "rev": "f07e8772042d9980bf6b6912d20b59709cbccd51",
+        "rev": "826d9ad46a22bef0294998e08daa3c4904fea28f",
         "type": "github"
       },
       "original": {
         "owner": "anomalyco",
+        "ref": "v1.18.21",
         "repo": "opencode",
         "type": "github"
       }
@@ -42,7 +42,9 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "opencode": "opencode",
+        "opencode": [
+          "opencode"
+        ],
         "systems": "systems",
         "treefmt-nix": "treefmt-nix"
       },
@@ -63,6 +65,7 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
+        "opencode": "opencode",
         "opencode-nix": "opencode-nix"
       }
     },

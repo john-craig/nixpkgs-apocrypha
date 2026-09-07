@@ -10,6 +10,17 @@ Import `homeModules.opencode-agents` and apply the repository overlay:
 }
 ```
 
+The overlay provides the Panoply-compatible OpenCode package version `1.18.21`,
+and `evak.opencode-agents.opencodePackage` uses that package by default. If a
+consumer manages OpenCode through an independent package set, pass its aligned
+package explicitly:
+
+```nix
+{
+  evak.opencode-agents.opencodePackage = pkgs.opencode;
+}
+```
+
 ## NixOS User Module
 
 For a NixOS system managed with Home Manager, `nixosModules.opencodeAgentsUser`

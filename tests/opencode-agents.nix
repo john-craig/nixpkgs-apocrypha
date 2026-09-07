@@ -285,6 +285,7 @@
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" 2>/dev/null
           test ! -e "$home/invocation-0"
           test ${builtins.toString (builtins.length (builtins.attrNames enabled))} -ge 26
+          grep -F '${pkgs.opencode}/bin/opencode' '${runner}/bin/opencode-agent'
           ! grep -q 'super-secret' ${config}
           touch $out
     ''
