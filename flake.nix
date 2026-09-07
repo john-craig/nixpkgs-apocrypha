@@ -95,7 +95,7 @@
            test ! -s "$capture/config-dir"
            test ! -e "$(cat "$capture/xdg-config-home")"
           for agent in \
-            audiovisual-design-assistant default deployment-specialist disk-jockey developer godot-game-developer \
+            audiovisual-design-assistant default deployment-specialist disk-jockey developer godot-game-developer interior-design-assistant \
             podcast-writer research-source-collector \
             librarian market-researcher note-taker orchestrator project-manager researcher \
             remote-systems-diagnostics-assistant retrospective software-architect systems-architect \

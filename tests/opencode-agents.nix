@@ -57,6 +57,7 @@
   developerConfig = enabled.".config/opencode/environments/developer.json".source;
   deploymentConfig = enabled.".config/opencode/environments/deployment-specialist.json".source;
   godotConfig = enabled.".config/opencode/environments/godot-game-developer.json".source;
+  interiorDesignConfig = enabled.".config/opencode/environments/interior-design-assistant.json".source;
   podcastWriterConfig = enabled.".config/opencode/environments/podcast-writer.json".source;
   researchCollectorConfig = enabled.".config/opencode/environments/research-source-collector.json".source;
   restrictedDeveloperConfig =
@@ -91,6 +92,7 @@
     "software-architect"
     "orchestrator"
     "audiovisual-design-assistant"
+    "interior-design-assistant"
     "godot-game-developer"
     "podcast-writer"
     "research-source-collector"
@@ -109,6 +111,7 @@
   mcpAgents = [
     "orchestrator"
     "audiovisual-design-assistant"
+    "interior-design-assistant"
     "godot-game-developer"
     "research-source-collector"
     "disk-jockey"
@@ -129,6 +132,8 @@
     enabled.".config/opencode/environments/audiovisual-design-assistant/skills/touchdesigner/SKILL.md".text;
   godotSkill =
     enabled.".config/opencode/environments/godot-game-developer/skills/godot-development/SKILL.md".text;
+  interiorDesignSkill =
+    enabled.".config/opencode/environments/interior-design-assistant/skills/interior-design/SKILL.md".text;
   podcastSkill =
     enabled.".config/opencode/environments/podcast-writer/skills/podcast-writing/SKILL.md".text;
   researchCollectorSkill =
@@ -154,6 +159,11 @@
   assert builtins.match ".*untrusted.*" godotSkill != null;
   assert builtins.match ".*provenance.*" godotSkill != null;
   assert builtins.match ".*approval.*" godotSkill != null;
+  assert builtins.match ".*canonical room model.*" interiorDesignSkill != null;
+  assert builtins.match ".*inferred.*construction-grade.*" interiorDesignSkill != null;
+  assert builtins.match ".*circulation.*" interiorDesignSkill != null;
+  assert builtins.match ".*[Ff]eng-shui.*" interiorDesignSkill != null;
+  assert builtins.match ".*non-operational.*" interiorDesignSkill != null;
   assert builtins.match ".*multi.*segment.*" podcastSkill != null;
   assert builtins.match ".*speaker.*turn.*" podcastSkill != null;
   assert builtins.match ".*citation.*" podcastSkill != null;
@@ -184,6 +194,9 @@
           jq -e '.agent.developer.permission["*"] == "allow"' ${developerConfig} >/dev/null
           jq -e '.agent["deployment-specialist"].model == "openai/gpt-5.6-sol" and .agent["deployment-specialist"].permission.bash == "ask" and .agent["deployment-specialist"].permission.edit == "deny" and (.agent["deployment-specialist"].description | contains("alucard"))' ${deploymentConfig} >/dev/null
            jq -e '.agent["godot-game-developer"].model == "openai/gpt-5.6-sol" and .agent["godot-game-developer"].permission.edit == "allow" and .agent["godot-game-developer"].permission.bash == "ask" and .agent["godot-game-developer"].permission.mcp == "ask"' ${godotConfig} >/dev/null
+            jq -e '.agent["interior-design-assistant"].model == "openai/gpt-5.6-luna" and .agent["interior-design-assistant"].permission.edit == "deny" and .agent["interior-design-assistant"].permission.bash == "deny" and .agent["interior-design-assistant"].permission.mcp == "ask" and .agent["interior-design-assistant"].permission["librecad_*"] == "ask"' ${interiorDesignConfig} >/dev/null
+            jq -e '(.mcp | keys) == ["librecad"] and .mcp.librecad.command == ["uvx", "--from", "aiblueprint-mcp==0.1.0", "aiblueprint-mcp"] and .mcp.librecad.environment.AIBLUEPRINT_WORKSPACE == "{env:AIBLUEPRINT_WORKSPACE}"' ${interiorDesignConfig} >/dev/null
+            jq -e '(.mcp // {}) == {}' ${developerConfig} >/dev/null
            jq -e '.agent["godot-game-developer"].permission["godot_*"] == "ask"' ${godotConfig} >/dev/null
            jq -e '.mcp.godot.command == ["npx", "-y", "@npgamedev/godot-mcp-server"] and .mcp.godot.environment.GODOT_MCP_PROJECT_PATH == "{env:GODOT_MCP_PROJECT_PATH}" and .mcp.godot.environment.GODOT_MCP_READ_ONLY == "{env:GODOT_MCP_READ_ONLY}"' ${godotConfig} >/dev/null
            jq -e '.mcp.godot.timeout == 30000' ${godotConfig} >/dev/null
