@@ -7,6 +7,7 @@
     software-architect = ./agents/software-architect;
     orchestrator = ./agents/orchestrator;
     audiovisual-design-assistant = ./agents/audiovisual-design-assistant;
+    interior-design-assistant = ./agents/interior-design-assistant;
     godot-game-developer = ./agents/godot-game-developer;
     podcast-writer = ./agents/podcast-writer;
     research-source-collector = ./agents/research-source-collector;

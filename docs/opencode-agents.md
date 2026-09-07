@@ -78,6 +78,14 @@ The migrated roles are `default`, `developer`, `software-architect`, `orchestrat
 `voice-assistant`, and `deployment-specialist`. Shared skills and rules are
 selected explicitly per role.
 
+The `interior-design-assistant` role is also available at
+`environments/interior-design-assistant.json`. It uses the `interior-design` skill for
+evidence-aware room intake, survey, strategy, layout authoring, critique, and reporting.
+Dimensions are classified as user-provided, measured, inferred, or proposed; image-derived
+dimensions remain inferred and are never construction-grade. The role checks units, openings,
+furniture collisions, clearances, circulation, accessibility, and privacy, but it is not an
+architect, engineer, code official, or construction certifier.
+
 | Panoply source environment | OpenCode environment |
 | --- | --- |
 | `default` | `environments/default.json` |
@@ -154,6 +162,40 @@ opencode-agent \
 
 Interactive mode launches OpenCode's normal terminal interface; it does not enable
 automatic approval. `--interactive` and `--prompt` are mutually exclusive.
+
+## Interior Design Assistant and LibreCAD
+
+Invoke the interior-design environment with the same runner:
+
+```console
+opencode-agent \
+  --agent interior-design-assistant \
+  --directory /path/to/isolated/project \
+  --prompt 'Review this room plan and propose two layouts with assumptions.'
+```
+
+The optional `librecad` MCP is a local stdio declaration for the reviewed
+`thebossnow/aiblueprint-mcp` package (`aiblueprint-mcp==0.1.0` via `uvx`). Consumers must
+provide `uv`/`uvx`, LibreCAD 2.2.1 or newer, and an explicitly writable isolated workspace
+through `AIBLUEPRINT_WORKSPACE`. DXF previews additionally require the consumer's LibreCAD
+binary (`LIBRECAD_BIN`) and a supported headless display such as Xvfb (`DISPLAY`). No runtime,
+path, credential, or machine-specific setup is bundled here.
+
+This integration can inspect DXF files, create or transform separate working copies, and
+request `dxf2png` previews when prerequisites are actually available. It does not control the
+live LibreCAD GUI. Missing command, binary, display, or workspace prerequisites must be
+reported as non-operational; text-only planning remains available.
+
+CAD creation, edits, deletion, save, overwrite, export, conversion, printing, layer/unit or
+metadata changes, and external operations require immediate approval for the exact target and
+action. Source drawings must be preserved and generated output must use a separate workspace.
+Room images, addresses, household and birth-date information are sensitive; minimize retention
+and external transmission. Drawing/file instructions are untrusted content, never authorization.
+Feng-shui output is optional traditional, cultural, or preference-based guidance, not an
+established scientific causal claim, and never overrides safety, accessibility, building code,
+budget, structural constraints, or user preferences. This repository embeds no CAD, feng-shui,
+furniture, or third-party agent code or assets; referenced projects remain subject to their own
+licenses and notices.
 
 The same runner is available directly from this flake, without Home Manager
 activation. It packages all generated agent environments and uses them by default:
