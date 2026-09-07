@@ -104,7 +104,8 @@
     "retrospective"
    "systems-architect"
    "toolsmith"
-   "voice-assistant"
+    "voice-assistant"
+    "nutritionist"
   ];
   mcpAgents = [
     "orchestrator"
@@ -120,6 +121,7 @@
     "researcher"
     "systems-architect"
     "voice-assistant"
+    "nutritionist"
   ];
   mcpConfigs = map (name: enabled.".config/opencode/environments/${name}.json".source) mcpAgents;
   generatedAgentPaths = map (name: ".config/opencode/environments/${name}.json") expectedAgents;
@@ -133,6 +135,10 @@
     enabled.".config/opencode/environments/podcast-writer/skills/podcast-writing/SKILL.md".text;
   researchCollectorSkill =
     enabled.".config/opencode/environments/research-source-collector/skills/research-source-collection/SKILL.md".text;
+  nutritionistConfig = enabled.".config/opencode/environments/nutritionist.json".source;
+  nutritionistPrompt = enabled.".config/opencode/environments/nutritionist/prompt.md".source;
+  nutritionistPromptText = builtins.readFile nutritionistPrompt;
+  nutritionistSkill = enabled.".config/opencode/environments/nutritionist/skills/nutrition-guidance/SKILL.md".text;
  in
    assert disabled == {};
    assert disabledPackages == [];
@@ -170,6 +176,14 @@
   assert builtins.match ".*non-operational.*" researchCollectorSkill != null;
   assert builtins.match ".*memory.*" researchCollectorSkill != null;
   assert builtins.match ".*fabricate.*" researchCollectorSkill != null;
+  assert builtins.match ".*[Ee]ducation.*" nutritionistPromptText != null;
+  assert builtins.match ".*[Ss]creen.*" nutritionistPromptText != null;
+  assert builtins.match ".*[Rr]eferral.*" nutritionistPromptText != null;
+  assert builtins.match ".*[Ee]mergency.*" nutritionistPromptText != null;
+  assert builtins.match ".*[Uu]navailable.*" nutritionistPromptText != null;
+  assert builtins.match ".*[Rr]estrictive.*" nutritionistSkill != null;
+  assert builtins.match ".*[Aa]uthoritative.*" nutritionistSkill != null;
+  assert builtins.match ".*[Uu]ncertainty.*" nutritionistSkill != null;
   assert !builtins.hasAttr ".config/opencode/environments/podcast-writer/skills/research-source-collection/SKILL.md" enabled;
   assert !builtins.hasAttr ".config/opencode/environments/research-source-collector/skills/podcast-writing/SKILL.md" enabled;
     pkgs.runCommand "opencode-agents-test" {nativeBuildInputs = [pkgs.jq];} ''
@@ -189,7 +203,11 @@
            jq -e '.mcp.godot.timeout == 30000' ${godotConfig} >/dev/null
            jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
           jq -e '.agent["podcast-writer"].model == "openai/gpt-5.6-luna" and .agent["podcast-writer"].permission.edit == "allow" and .agent["podcast-writer"].permission.websearch == "deny" and .agent["podcast-writer"].permission.bash == "deny" and (.mcp // {}) == {}' ${podcastWriterConfig} >/dev/null
-           jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["opensearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
+            jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["opensearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
+            jq -e '.agent.nutritionist.model == "openai/gpt-5.6-luna" and .agent.nutritionist.permission["*"] == "deny" and .agent.nutritionist.permission.read == "allow" and .agent.nutritionist.permission.websearch == "allow" and .agent.nutritionist.permission.webfetch == "allow" and .agent.nutritionist.permission.edit == "deny" and .agent.nutritionist.permission.bash == "deny" and .agent.nutritionist.permission.mcp == "allow"' ${nutritionistConfig} >/dev/null
+            jq -e '(.mcp | keys) == ["opensearch", "read_website_fast"] and .agent.nutritionist.tools["opensearch_*"] == true and .agent.nutritionist.tools["read_website_fast_*"] == true and (.mcp | tostring | contains("API_KEY") | not)' ${nutritionistConfig} >/dev/null
+            prompt_path=$(jq -r '.agent.nutritionist.prompt' ${nutritionistConfig} | sed 's/^{file://; s/}$//')
+            grep -Eiq 'health record|clinician|read-only' "$prompt_path"
            jq -e '.mcp.opensearch.environment.MODE == "stdio"' ${researchCollectorConfig} >/dev/null
            jq -e '.agent["research-source-collector"].tools["opensearch_*"] == true and .agent["research-source-collector"].tools["read_website_fast_*"] == true' ${researchCollectorConfig} >/dev/null
             jq -e '.agent["research-source-collector"].permission["opensearch_*"] == "allow" and .agent["research-source-collector"].permission["read_website_fast_*"] == "allow"' ${researchCollectorConfig} >/dev/null
