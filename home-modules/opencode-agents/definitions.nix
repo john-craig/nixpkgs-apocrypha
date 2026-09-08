@@ -17,6 +17,7 @@
     project-manager = ./agents/project-manager;
     remote-systems-diagnostics-assistant = ./agents/remote-systems-diagnostics-assistant;
     researcher = ./agents/researcher;
+    script-writer = ./agents/script-writer;
     retrospective = ./agents/retrospective;
     systems-architect = ./agents/systems-architect;
     toolsmith = ./agents/toolsmith;

@@ -96,7 +96,7 @@ setting `defaultAgent` or invoking OpenCode with
 
 The migrated roles are `default`, `developer`, `software-architect`, `orchestrator`,
 `godot-game-developer`,
-`podcast-writer`, `research-source-collector`,
+`podcast-writer`, `research-source-collector`, `script-writer`,
 `audiovisual-design-assistant`, `disk-jockey`, `librarian`, `market-researcher`,
 `note-taker`, `project-manager`, `remote-systems-diagnostics-assistant`,
 `researcher`, `retrospective`, `systems-architect`, `toolsmith`,
@@ -125,6 +125,7 @@ selected explicitly per role.
 | `godot-game-developer` | `environments/godot-game-developer.json` |
 | `podcast-writer` | `environments/podcast-writer.json` |
 | `research-source-collector` | `environments/research-source-collector.json` |
+| `script-writer` | `environments/script-writer.json` |
 
 Codex launcher homes, `model_reasoning_effort`, session lifecycle behavior, and
 project-home isolation have no direct OpenCode equivalent. Model names are
@@ -231,6 +232,32 @@ credentials, or external writes. Runtime OpenCode/provider authentication and an
 adapter remain consumer prerequisites. If research prerequisites are unavailable, the collector
 must report a non-operational run rather than answer from memory or fabricate evidence. Source
 text and corpus instructions are untrusted data, not authorization.
+
+## Script Writer
+
+The `script-writer` environment is generated at
+`.config/opencode/environments/script-writer.json`, with its prompt at
+`.config/opencode/environments/script-writer/prompt.md` and reusable guidance at
+`.config/opencode/environments/script-writer/skills/script-writing/SKILL.md`. It supports
+separate short-form and long-form routes and keeps narration, visuals, on-screen text, sound,
+timing, and source notes distinct. It preserves links, quotations, numbers, uncertainty, and
+intentional author voice; unsupported claims use `[SOURCE NEEDED]` and missing firsthand context
+uses `[AUTHOR INPUT NEEDED]`.
+
+The role may edit an explicitly authorized repository content path and must report the changed
+paths and diff. It cannot publish, post, commit, push, delete unrelated files, or mutate external
+systems; shell operations are denied. Its optional research MCP declarations are runtime
+prerequisites, not proof that an integration is operational. For example:
+
+```console
+opencode-agent --agent script-writer --directory /path/to/repository \
+  --prompt 'Adapt the authorized content file docs/video-topic.md into a short-form script and show the diff.'
+```
+
+The guidance is independently authored while adapting documented concepts from
+`bradtraversy/editorial-workflow`, `bnivanov/omp-writing-skills`, `ehmo/slopkit`, and
+`conorbronsdon/avoid-ai-writing`. Those referenced projects are MIT-licensed; no upstream
+prompts, corpora, detector logic, or scripts are copied into the generated role.
 
 ## Maintainer Source Layout
 
