@@ -59,6 +59,18 @@
   godotConfig = enabled.".config/opencode/environments/godot-game-developer.json".source;
   podcastWriterConfig = enabled.".config/opencode/environments/podcast-writer.json".source;
   researchCollectorConfig = enabled.".config/opencode/environments/research-source-collector.json".source;
+  marketResearchConfig = enabled.".config/opencode/environments/market-researcher.json".source;
+  marketResearchSkill =
+    enabled.".config/opencode/environments/market-researcher/skills/market-research/SKILL.md".text;
+  readOnlyMarketResearchConfig =
+    (eval true {
+      config.evak.opencode-agents.agents.market-researcher.permission = {
+        "*" = "deny";
+        read = "allow";
+        list = "allow";
+        mcp = "ask";
+      };
+    }).config.home.file.".config/opencode/environments/market-researcher.json".source;
   restrictedDeveloperConfig =
     (eval true {
       config.evak.opencode-agents.agents.developer.permission = {
@@ -170,6 +182,12 @@
   assert builtins.match ".*non-operational.*" researchCollectorSkill != null;
   assert builtins.match ".*memory.*" researchCollectorSkill != null;
   assert builtins.match ".*fabricate.*" researchCollectorSkill != null;
+  assert builtins.match ".*evidence-ledger.*" marketResearchSkill != null;
+  assert builtins.match ".*explicitly identified local output.*" marketResearchSkill != null;
+  assert builtins.match ".*superseded.*" marketResearchSkill != null;
+  assert builtins.match ".*untrusted data.*" marketResearchSkill != null;
+  assert builtins.match ".*credentials.*" marketResearchSkill != null;
+  assert builtins.match ".*external services.*" marketResearchSkill != null;
   assert !builtins.hasAttr ".config/opencode/environments/podcast-writer/skills/research-source-collection/SKILL.md" enabled;
   assert !builtins.hasAttr ".config/opencode/environments/research-source-collector/skills/podcast-writing/SKILL.md" enabled;
     pkgs.runCommand "opencode-agents-test" {nativeBuildInputs = [pkgs.jq];} ''
@@ -189,7 +207,10 @@
            jq -e '.mcp.godot.timeout == 30000' ${godotConfig} >/dev/null
            jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
           jq -e '.agent["podcast-writer"].model == "openai/gpt-5.6-luna" and .agent["podcast-writer"].permission.edit == "allow" and .agent["podcast-writer"].permission.websearch == "deny" and .agent["podcast-writer"].permission.bash == "deny" and (.mcp // {}) == {}' ${podcastWriterConfig} >/dev/null
-           jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["opensearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
+            jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["opensearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
+            jq -e '.agent["market-researcher"].model == "openai/gpt-5.6-terra" and .agent["market-researcher"].permission.edit == "allow" and .agent["market-researcher"].permission.read == "allow" and .agent["market-researcher"].permission.bash == "ask" and .agent["market-researcher"].permission.websearch == "deny" and .agent["market-researcher"].permission.webfetch == "deny" and .agent["market-researcher"].permission.mcp == "ask" and .agent["market-researcher"].permission["open_websearch_*"] == "ask" and .agent["market-researcher"].permission["read_website_fast_*"] == "ask"' ${marketResearchConfig} >/dev/null
+            jq -e '.mcp.open_websearch.command == ["npx", "-y", "open-websearch@latest"] and .mcp.read_website_fast.command == ["npx", "-y", "@just-every/mcp-read-website-fast"] and ([.mcp[] | has("environment") and (to_entries | all(.[]; (.value | tostring | test("secret|token|private|/home/|/tmp/"; "i") | not)))] | all)' ${marketResearchConfig} >/dev/null
+            jq -e '.agent["market-researcher"].permission["*"] == "deny" and .agent["market-researcher"].permission.edit == "allow" and .agent["market-researcher"].permission.bash == "ask"' ${readOnlyMarketResearchConfig} >/dev/null
            jq -e '.mcp.opensearch.environment.MODE == "stdio"' ${researchCollectorConfig} >/dev/null
            jq -e '.agent["research-source-collector"].tools["opensearch_*"] == true and .agent["research-source-collector"].tools["read_website_fast_*"] == true' ${researchCollectorConfig} >/dev/null
             jq -e '.agent["research-source-collector"].permission["opensearch_*"] == "allow" and .agent["research-source-collector"].permission["read_website_fast_*"] == "allow"' ${researchCollectorConfig} >/dev/null
