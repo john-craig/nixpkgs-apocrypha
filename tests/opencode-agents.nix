@@ -57,6 +57,7 @@
   developerConfig = enabled.".config/opencode/environments/developer.json".source;
   deploymentConfig = enabled.".config/opencode/environments/deployment-specialist.json".source;
   godotConfig = enabled.".config/opencode/environments/godot-game-developer.json".source;
+  blogWriterConfig = enabled.".config/opencode/environments/blog-writer.json".source;
   podcastWriterConfig = enabled.".config/opencode/environments/podcast-writer.json".source;
   researchCollectorConfig = enabled.".config/opencode/environments/research-source-collector.json".source;
   restrictedDeveloperConfig =
@@ -90,8 +91,9 @@
     "deployment-specialist"
     "software-architect"
     "orchestrator"
-    "audiovisual-design-assistant"
-    "godot-game-developer"
+     "audiovisual-design-assistant"
+     "blog-writer"
+     "godot-game-developer"
     "podcast-writer"
     "research-source-collector"
     "disk-jockey"
@@ -133,6 +135,8 @@
     enabled.".config/opencode/environments/podcast-writer/skills/podcast-writing/SKILL.md".text;
   researchCollectorSkill =
     enabled.".config/opencode/environments/research-source-collector/skills/research-source-collection/SKILL.md".text;
+  blogWritingSkill = enabled.".config/opencode/environments/blog-writer/skills/blog-writing/SKILL.md".text;
+  editorialWorkflowSkill = enabled.".config/opencode/environments/blog-writer/skills/editorial-workflow/SKILL.md".text;
  in
    assert disabled == {};
    assert disabledPackages == [];
@@ -169,7 +173,14 @@
   assert builtins.match ".*contradictions.*" researchCollectorSkill != null;
   assert builtins.match ".*non-operational.*" researchCollectorSkill != null;
   assert builtins.match ".*memory.*" researchCollectorSkill != null;
-  assert builtins.match ".*fabricate.*" researchCollectorSkill != null;
+   assert builtins.match ".*fabricate.*" researchCollectorSkill != null;
+   assert builtins.match ".*concrete.*" blogWritingSkill != null;
+   assert builtins.match ".*minimum necessary edits.*" blogWritingSkill != null;
+   assert builtins.match ".*author voice.*" blogWritingSkill != null;
+   assert builtins.match ".*detector.*" blogWritingSkill != null;
+   assert builtins.match ".*brief.*research.*angle.*outline.*draft.*fact review.*voice review.*revision.*final packaging.*" editorialWorkflowSkill != null;
+   assert builtins.match ".*[[]SOURCE NEEDED[]].*" editorialWorkflowSkill != null;
+   assert builtins.match ".*[[]AUTHOR INPUT NEEDED[]].*" editorialWorkflowSkill != null;
   assert !builtins.hasAttr ".config/opencode/environments/podcast-writer/skills/research-source-collection/SKILL.md" enabled;
   assert !builtins.hasAttr ".config/opencode/environments/research-source-collector/skills/podcast-writing/SKILL.md" enabled;
     pkgs.runCommand "opencode-agents-test" {nativeBuildInputs = [pkgs.jq];} ''
@@ -187,7 +198,9 @@
            jq -e '.agent["godot-game-developer"].permission["godot_*"] == "ask"' ${godotConfig} >/dev/null
            jq -e '.mcp.godot.command == ["npx", "-y", "@npgamedev/godot-mcp-server"] and .mcp.godot.environment.GODOT_MCP_PROJECT_PATH == "{env:GODOT_MCP_PROJECT_PATH}" and .mcp.godot.environment.GODOT_MCP_READ_ONLY == "{env:GODOT_MCP_READ_ONLY}"' ${godotConfig} >/dev/null
            jq -e '.mcp.godot.timeout == 30000' ${godotConfig} >/dev/null
-           jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
+            jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
+            jq -e '.agent["blog-writer"].model == "openai/gpt-5.6-luna" and .agent["blog-writer"].permission.edit == "allow" and .agent["blog-writer"].permission.delete == "deny" and .agent["blog-writer"].permission.bash == "ask" and .agent["blog-writer"].permission.websearch == "allow" and .agent["blog-writer"].permission.webfetch == "allow" and .agent["blog-writer"].permission.mcp == "deny" and (.mcp // {}) == {}' ${blogWriterConfig} >/dev/null
+            jq -e '(.agent["blog-writer"].prompt | startswith("{file:")) and (.agent["blog-writer"].tools // {}) == {}' ${blogWriterConfig} >/dev/null
           jq -e '.agent["podcast-writer"].model == "openai/gpt-5.6-luna" and .agent["podcast-writer"].permission.edit == "allow" and .agent["podcast-writer"].permission.websearch == "deny" and .agent["podcast-writer"].permission.bash == "deny" and (.mcp // {}) == {}' ${podcastWriterConfig} >/dev/null
            jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["opensearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
            jq -e '.mcp.opensearch.environment.MODE == "stdio"' ${researchCollectorConfig} >/dev/null
@@ -206,8 +219,9 @@
           home=$(mktemp -d)
           mkdir -p "$home/project" "$home/.config/opencode/environments"
           touch "$home/.config/opencode/environments/developer.json"
-          touch "$home/.config/opencode/environments/godot-game-developer.json"
-          touch "$home/.config/opencode/environments/podcast-writer.json"
+           touch "$home/.config/opencode/environments/godot-game-developer.json"
+           touch "$home/.config/opencode/environments/blog-writer.json"
+           touch "$home/.config/opencode/environments/podcast-writer.json"
           touch "$home/.config/opencode/environments/research-source-collector.json"
           prompt=$'Preserve "quoted" text\nand whitespace.'
           set +e
@@ -276,9 +290,19 @@
           set -e
           test "$status" -eq 7
           test "$(cat "$home/invocation-4")" = research-source-collector
-          printf '%s' "$prompt" | cmp - "$home/invocation-5"
-          test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/research-source-collector.json"
-          rm "$home"/invocation-*
+           printf '%s' "$prompt" | cmp - "$home/invocation-5"
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/research-source-collector.json"
+           prompt=$'Draft only the authorized blog content file.'
+           set +e
+           HOME="$home" ${runnerWithFake}/bin/opencode-agent \
+             --agent blog-writer --directory "$home/project" --prompt "$prompt"
+           status=$?
+           set -e
+           test "$status" -eq 7
+           test "$(cat "$home/invocation-4")" = blog-writer
+           printf '%s' "$prompt" | cmp - "$home/invocation-5"
+           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/blog-writer.json"
+           rm "$home"/invocation-*
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent unknown --directory "$home/project" --prompt test 2>/dev/null
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/missing" --prompt test 2>/dev/null
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/project" --prompt "" 2>/dev/null

@@ -96,6 +96,7 @@ setting `defaultAgent` or invoking OpenCode with
 
 The migrated roles are `default`, `developer`, `software-architect`, `orchestrator`,
 `godot-game-developer`,
+`blog-writer`,
 `podcast-writer`, `research-source-collector`,
 `audiovisual-design-assistant`, `disk-jockey`, `librarian`, `market-researcher`,
 `note-taker`, `project-manager`, `remote-systems-diagnostics-assistant`,
@@ -123,6 +124,7 @@ selected explicitly per role.
 | `voice-assistant` | `environments/voice-assistant.json` |
 | `deployment-specialist` | `environments/deployment-specialist.json` |
 | `godot-game-developer` | `environments/godot-game-developer.json` |
+| `blog-writer` | `environments/blog-writer.json` |
 | `podcast-writer` | `environments/podcast-writer.json` |
 | `research-source-collector` | `environments/research-source-collector.json` |
 
@@ -266,3 +268,24 @@ untrusted. Distinguish user, generated, downloaded, and placeholder assets, and 
 licenses and attribution. The adapter reviewed GodotPrompter (MIT), GD-Agentic-Skills
 (LGPL-3.0), and awesome-gamedev-agent-skills (Apache-2.0) without copying their prompts,
 corpora, scripts, assets, or catalogs. `gda` and Godot Sight remain future alternatives.
+
+## Blog Writer
+
+The `blog-writer` role supports research-backed blog drafting and minimum-edit revision. It
+keeps brief, research, angle, outline, draft, fact review, voice review, revision, and final
+packaging as distinct stages. Its style is conversational, concrete, restrained, and
+desloppified: it removes filler and inflated framing without forcing slang or erasing an
+intentional author voice. Unsupported claims use `[SOURCE NEEDED]`; missing firsthand context
+uses `[AUTHOR INPUT NEEDED]`. Facts, links, citations, quotes, code, numbers, headings, tables,
+front matter, and uncertainty are preserved unless explicitly authorized otherwise.
+
+Writing is enabled only after the user identifies and authorizes the exact blog/content path in
+the selected repository. The role reports changed paths and the resulting diff, preserves
+unrelated work, and refuses ambiguous or out-of-scope targets. It has no publishing, posting,
+external-write, or MCP integration; publication, commits, pushes, and deletion remain outside
+the role. For example:
+
+```console
+opencode-agent --agent blog-writer --directory /path/to/repository --prompt \
+  'Draft the authorized content/blog/example.md and report the editorial passes and diff.'
+```
