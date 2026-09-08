@@ -100,8 +100,8 @@ The migrated roles are `default`, `developer`, `software-architect`, `orchestrat
 `audiovisual-design-assistant`, `disk-jockey`, `librarian`, `market-researcher`,
 `note-taker`, `project-manager`, `remote-systems-diagnostics-assistant`,
 `researcher`, `retrospective`, `systems-architect`, `toolsmith`,
-`voice-assistant`, and `deployment-specialist`. Shared skills and rules are
-selected explicitly per role.
+`voice-assistant`, `deployment-specialist`, and `video-editing-assistant`. Shared
+skills and rules are selected explicitly per role.
 
 | Panoply source environment | OpenCode environment |
 | --- | --- |
@@ -125,6 +125,7 @@ selected explicitly per role.
 | `godot-game-developer` | `environments/godot-game-developer.json` |
 | `podcast-writer` | `environments/podcast-writer.json` |
 | `research-source-collector` | `environments/research-source-collector.json` |
+| `video-editing-assistant` | `environments/video-editing-assistant.json` |
 
 Codex launcher homes, `model_reasoning_effort`, session lifecycle behavior, and
 project-home isolation have no direct OpenCode equivalent. Model names are
@@ -266,3 +267,39 @@ untrusted. Distinguish user, generated, downloaded, and placeholder assets, and 
 licenses and attribution. The adapter reviewed GodotPrompter (MIT), GD-Agentic-Skills
 (LGPL-3.0), and awesome-gamedev-agent-skills (Apache-2.0) without copying their prompts,
 corpora, scripts, assets, or catalogs. `gda` and Godot Sight remain future alternatives.
+
+## Video Editing Assistant
+
+The `video-editing-assistant` role uses inspection, planning, script or storyboard,
+media preparation, editing, preview, quality control, and delivery stages. It selects
+between HyperFrames HTML/CSS/GSAP composition and footage-led Kdenlive editing
+explicitly, records the approved runtime, and never switches silently. See the
+canonical [HyperFrames](https://github.com/hyperframesai/hyperframes) and
+[OpenMontage](https://github.com/OpenMontage/OpenMontage) repositories.
+
+Its editing-specific MCP declaration targets D-Ogi's documented stdio server with
+`python -m mcp_kdenlive`. Runtime setup remains consumer-provided:
+
+```console
+python -m pip install -r requirements.txt
+python -m mcp_kdenlive
+```
+
+The server requires Python 3.10+, `kdenlive-api`, the MCP SDK, and a running patched
+Kdenlive with its D-Bus scripting API. FFmpeg is required by the consumer's render
+workflow. The generated declaration does not install or verify prerequisites, provide
+credentials, or embed a machine-specific project path. Identify the authorized
+project root, source media, working copy or snapshot, and output directory before
+work; inventory existing footage before proposing timeline changes.
+
+Approval is required immediately before timeline changes, project save or overwrite,
+media deletion or replacement, rendering, and export. If the command, API, or running
+Kdenlive instance is unavailable, the affected stage is non-operational: report the
+blocker, do not claim an edit or render completed, and await approval before choosing
+an alternative. Reports distinguish observed evidence from plans and inferences and
+include provenance, tools, settings, output paths, warnings, and QC checks actually
+performed.
+
+HyperFrames is Apache-2.0 and OpenMontage is AGPL-3.0. This repository adapts their
+workflow concepts and links to upstream; it does not vendor OpenMontage's AGPL skill
+corpus.

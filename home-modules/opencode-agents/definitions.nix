@@ -8,6 +8,7 @@
     orchestrator = ./agents/orchestrator;
     audiovisual-design-assistant = ./agents/audiovisual-design-assistant;
     godot-game-developer = ./agents/godot-game-developer;
+    video-editing-assistant = ./agents/video-editing-assistant;
     podcast-writer = ./agents/podcast-writer;
     research-source-collector = ./agents/research-source-collector;
     disk-jockey = ./agents/disk-jockey;

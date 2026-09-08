@@ -57,6 +57,7 @@
   developerConfig = enabled.".config/opencode/environments/developer.json".source;
   deploymentConfig = enabled.".config/opencode/environments/deployment-specialist.json".source;
   godotConfig = enabled.".config/opencode/environments/godot-game-developer.json".source;
+  videoEditingConfig = enabled.".config/opencode/environments/video-editing-assistant.json".source;
   podcastWriterConfig = enabled.".config/opencode/environments/podcast-writer.json".source;
   researchCollectorConfig = enabled.".config/opencode/environments/research-source-collector.json".source;
   restrictedDeveloperConfig =
@@ -92,6 +93,7 @@
     "orchestrator"
     "audiovisual-design-assistant"
     "godot-game-developer"
+    "video-editing-assistant"
     "podcast-writer"
     "research-source-collector"
     "disk-jockey"
@@ -120,6 +122,7 @@
     "researcher"
     "systems-architect"
     "voice-assistant"
+    "video-editing-assistant"
   ];
   mcpConfigs = map (name: enabled.".config/opencode/environments/${name}.json".source) mcpAgents;
   generatedAgentPaths = map (name: ".config/opencode/environments/${name}.json") expectedAgents;
@@ -129,6 +132,8 @@
     enabled.".config/opencode/environments/audiovisual-design-assistant/skills/touchdesigner/SKILL.md".text;
   godotSkill =
     enabled.".config/opencode/environments/godot-game-developer/skills/godot-development/SKILL.md".text;
+  videoEditingSkill =
+    enabled.".config/opencode/environments/video-editing-assistant/skills/video-editing/SKILL.md".text;
   podcastSkill =
     enabled.".config/opencode/environments/podcast-writer/skills/podcast-writing/SKILL.md".text;
   researchCollectorSkill =
@@ -154,6 +159,15 @@
   assert builtins.match ".*untrusted.*" godotSkill != null;
   assert builtins.match ".*provenance.*" godotSkill != null;
   assert builtins.match ".*approval.*" godotSkill != null;
+  assert builtins.match ".*HyperFrames.*" videoEditingSkill != null;
+  assert builtins.match ".*OpenMontage.*" videoEditingSkill != null;
+  assert builtins.match ".*Kdenlive.*" videoEditingSkill != null;
+  assert builtins.match ".*snapshot.*" videoEditingSkill != null;
+  assert builtins.match ".*timeline.*approval.*" videoEditingSkill != null;
+  assert builtins.match ".*render.*" videoEditingSkill != null;
+  assert builtins.match ".*export.*" videoEditingSkill != null;
+  assert builtins.match ".*unavailable.*" videoEditingSkill != null;
+  assert builtins.match ".*provenance.*" videoEditingSkill != null;
   assert builtins.match ".*multi.*segment.*" podcastSkill != null;
   assert builtins.match ".*speaker.*turn.*" podcastSkill != null;
   assert builtins.match ".*citation.*" podcastSkill != null;
@@ -188,6 +202,8 @@
            jq -e '.mcp.godot.command == ["npx", "-y", "@npgamedev/godot-mcp-server"] and .mcp.godot.environment.GODOT_MCP_PROJECT_PATH == "{env:GODOT_MCP_PROJECT_PATH}" and .mcp.godot.environment.GODOT_MCP_READ_ONLY == "{env:GODOT_MCP_READ_ONLY}"' ${godotConfig} >/dev/null
            jq -e '.mcp.godot.timeout == 30000' ${godotConfig} >/dev/null
            jq -e '(.mcp | keys) == ["godot"]' ${godotConfig} >/dev/null
+           jq -e '.agent["video-editing-assistant"].model == "openai/gpt-5.6-sol" and .agent["video-editing-assistant"].permission.edit == "ask" and .agent["video-editing-assistant"].permission.bash == "ask" and .agent["video-editing-assistant"].permission.mcp == "ask" and .agent["video-editing-assistant"].permission.task == "deny"' ${videoEditingConfig} >/dev/null
+           jq -e '.mcp.kdenlive.command == ["python", "-m", "mcp_kdenlive"] and (.mcp | keys) == ["kdenlive"] and (.mcp.kdenlive.environment // {}) == {} and (.mcp.kdenlive.headers // {}) == {}' ${videoEditingConfig} >/dev/null
           jq -e '.agent["podcast-writer"].model == "openai/gpt-5.6-luna" and .agent["podcast-writer"].permission.edit == "allow" and .agent["podcast-writer"].permission.websearch == "deny" and .agent["podcast-writer"].permission.bash == "deny" and (.mcp // {}) == {}' ${podcastWriterConfig} >/dev/null
            jq -e '.agent["research-source-collector"].model == "openai/gpt-5.6-luna" and .agent["research-source-collector"].permission.websearch == "allow" and .agent["research-source-collector"].permission.webfetch == "allow" and .agent["research-source-collector"].permission.bash == "deny" and (.mcp | keys) == ["opensearch", "read_website_fast"]' ${researchCollectorConfig} >/dev/null
            jq -e '.mcp.opensearch.environment.MODE == "stdio"' ${researchCollectorConfig} >/dev/null
@@ -209,6 +225,7 @@
           touch "$home/.config/opencode/environments/godot-game-developer.json"
           touch "$home/.config/opencode/environments/podcast-writer.json"
           touch "$home/.config/opencode/environments/research-source-collector.json"
+          touch "$home/.config/opencode/environments/video-editing-assistant.json"
           prompt=$'Preserve "quoted" text\nand whitespace.'
           set +e
           HOME="$home" ${runnerWithFake}/bin/opencode-agent \
@@ -278,6 +295,17 @@
           test "$(cat "$home/invocation-4")" = research-source-collector
           printf '%s' "$prompt" | cmp - "$home/invocation-5"
           test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/research-source-collector.json"
+          rm "$home"/invocation-*
+          prompt=$'Inspect footage and propose an approved edit plan.'
+          set +e
+          HOME="$home" ${runnerWithFake}/bin/opencode-agent \
+            --agent video-editing-assistant --directory "$home/project" --prompt "$prompt"
+          status=$?
+          set -e
+          test "$status" -eq 7
+          test "$(cat "$home/invocation-4")" = video-editing-assistant
+          printf '%s' "$prompt" | cmp - "$home/invocation-5"
+          test "$(cat "$home/config-path")" = "$home/.config/opencode/environments/video-editing-assistant.json"
           rm "$home"/invocation-*
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent unknown --directory "$home/project" --prompt test 2>/dev/null
           ! HOME="$home" ${runnerWithFake}/bin/opencode-agent --agent developer --directory "$home/missing" --prompt test 2>/dev/null
