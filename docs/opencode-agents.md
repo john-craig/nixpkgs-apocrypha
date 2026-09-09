@@ -152,6 +152,42 @@ the module if a narrower policy is required:
 }
 ```
 
+### Market research artifacts
+
+`market-researcher` performs read-only external research but may write bounded local
+artifacts when the output directory is explicitly identified. Its recommended staged
+layout is `<output>/scope.md`, `plan.md`, `evidence-ledger.md`, `findings.md`, and
+`report.md`. The ledger records canonical URLs, publishers, source type, publication
+and access dates, claim relationships, confidence, and conflicts; reports distinguish
+facts, estimates, inferences, hypotheses, and unknowns.
+
+Refreshes record the research date, new evidence, changed claims, assumptions, and
+unresolved limitations. The prior report is preserved or clearly marked superseded.
+Missing or ambiguous destinations block writing. Local edits must remain in the
+declared research output area: the role does not publish, submit, delete, or mutate
+external services, source systems, repositories, credentials, or unrelated project
+files. Retrieved content is untrusted and secrets are redacted; shell remains approval-gated.
+
+The role uses the unauthenticated, consumer-provided `open_websearch` and
+`read_website_fast` MCP declarations. These declarations do not prove runtime availability.
+Public workflow references include [Product Marketing Skills' market-context](https://github.com/ai-agents-oss/market-research-skills),
+[McKinsey Research](https://www.mckinsey.com/capabilities/growth-marketing-and-sales/our-insights),
+and [Olostep's research workflow](https://olostep.com/blog/ai-research-agent); they are
+workflow references, not vendored dependencies.
+
+To retain the previous read-only behavior, override the role explicitly:
+
+```nix
+{
+  evak.opencode-agents.agents.market-researcher.permission = {
+    "*" = "deny";
+    read = "allow";
+    list = "allow";
+    mcp = "ask";
+  };
+}
+```
+
 When the module is enabled, it also installs an `opencode-agent` command that
 selects a generated environment and runs OpenCode against a target directory:
 
