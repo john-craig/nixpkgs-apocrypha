@@ -38,6 +38,21 @@
       homeModules = import ./home-modules;
       overlays.opencode-nix = opencodeOverlay;
       checks = forAllSystems (system: let pkgs = pkgsFor system; in {
+        es2button = let
+          package = self.legacyPackages.${system}.es2button;
+          overlayPackages = import ./overlay.nix pkgs pkgs;
+        in pkgs.runCommandNoCC "es2button-package-check" { } ''
+          test -x "${package}/bin/es2button"
+          test "${package.meta.mainProgram}" = es2button
+          test "${package.meta.homepage}" = https://github.com/janrueth/es2button
+          test "${toString (builtins.elem system package.meta.platforms)}" = 1
+          test "${package.src.rev}" = 624df7ac087cd7e3ca5ca79d7e811c68e5fca8d5
+          test "${package.cargoHash}" = sha256-6SDSIVuhuSr/ERxd6EF4Y3KLIeK2Hue4sdZ1XlPbapY=
+          test "${overlayPackages.es2button.drvPath}" = "${package.drvPath}"
+          test ! -e "${package}/lib/epson-scan-2"
+          test ! -e "${package}/lib/epsonscan2"
+          touch "$out"
+        '';
         sceptre = pkgs.runCommand "sceptre-check" {
           nativeBuildInputs = [ self.legacyPackages.${system}.sceptre ];
         } ''

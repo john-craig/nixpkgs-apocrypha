@@ -31,6 +31,7 @@ in
   overlays = import ./overlays; # nixpkgs overlays
 
   lshell = pkgs.callPackage ./pkgs/lshell { };
+  es2button = pkgs.callPackage ./pkgs/es2button { };
   receipt-scanner = pkgs.callPackage ./pkgs/receipt-scanner { };
   opencode-agent = opencodeAgent;
   openspec-implementor = pkgs.callPackage ./pkgs/openspec-implementor {
