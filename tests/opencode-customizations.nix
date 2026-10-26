@@ -40,7 +40,9 @@ pkgs.runCommand "opencode-customizations-test" {
     ."$schema" == "https://opencode.ai/theme.json" and
     .theme.primary == "pink" and
     .theme.accent == "cyan" and
-    .theme.background == "background"
+    .theme.background == "background" and
+    .theme.diffHighlightAdded == "#97f1d8" and
+    .theme.diffHighlightRemoved == "#fb9288"
   ' ${enabled.".config/opencode/themes/synthwave-84.json".source} >/dev/null
 
   jq -e '

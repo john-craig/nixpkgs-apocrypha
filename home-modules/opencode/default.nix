@@ -46,6 +46,10 @@ let
       borderSubtle = "#3b2d4d";
       diffAdded = "green";
       diffRemoved = "orange";
+      # Brighter diff colors for highlighted lines; opencode >= 2.x falls back
+      # to the default theme when a v1 theme omits these keys.
+      diffHighlightAdded = "#97f1d8";
+      diffHighlightRemoved = "#fb9288";
       diffContext = "muted";
       diffHunkHeader = "purple";
       diffAddedBg = "#183d3a";
